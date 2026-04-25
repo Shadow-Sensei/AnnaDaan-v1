@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Donor Dashboard — AnnaDaan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    :root {
+      --green:       #1a4731;
+      --green-mid:   #2d6a4f;
+      --green-light: #52b788;
+      --green-pale:  #d8f3dc;
+      --amber:       #e76f51;
+      --amber-pale:  #fef3ee;
+      --cream:       #faf7f2;
+      --warm-white:  #fffdf9;
+      --gray-100:    #f3f4f6;
+      --gray-200:    #e5e7eb;
+      --gray-400:    #9ca3af;
+      --gray-600:    #6b7280;
+      --gray-900:    #111827;
+      --red:         #dc2626;
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body:    'DM Sans', system-ui, sans-serif;
+      --sidebar-w:    240px;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--cream);
+      color: var(--gray-900);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--green);
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; bottom: 0;
+      z-index: 50;
+      overflow: hidden;
+    }
+    .sidebar::after {
+      content: '';
+      position: absolute; bottom: 0; right: 0;
+      width: 180px; height: 180px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+      transform: translate(40%, 40%);
+      pointer-events: none;
+    }
+
+    .sidebar-logo {
+      padding: 1.5rem 1.25rem 1.25rem;
+      font-family: var(--font-display);
+      font-size: 1.3rem; font-weight: 900;
+      color: #fff; text-decoration: none;
+      display: block; flex-shrink: 0;
+    }
+    .sidebar-logo span { color: var(--amber); }
+
+    .sidebar-role {
+      margin: 0 1rem 1.25rem;
+      background: rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.75rem; font-weight: 600;
+      color: rgba(255,255,255,0.7);
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+
+    .sidebar-nav { flex: 1; padding: 0 0.75rem; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 0.6rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.875rem; font-weight: 500;
+      color: rgba(255,255,255,0.65);
+      cursor: pointer; transition: all 0.15s;
+      text-decoration: none; margin-bottom: 2px;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+    .nav-item.active { background: rgba(255,255,255,0.13); color: #fff; font-weight: 600; }
+    .nav-icon { font-size: 1rem; width: 20px; text-align: center; flex-shrink: 0; }
+
+    .sidebar-footer {
+      padding: 1rem 0.75rem 1.5rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      position: relative; z-index: 1;
+    }
+    .user-chip {
+      display: flex; align-items: center; gap: 10px;
+      padding: 0.5rem 0.5rem;
+      border-radius: 8px; margin-bottom: 8px;
+    }
+    .user-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--amber);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.85rem; color: #fff;
+      flex-shrink: 0;
+    }
+    .user-info { overflow: hidden; }
+    .user-name { font-size: 0.82rem; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-email { font-size: 0.7rem; color: rgba(255,255,255,0.45); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .logout-btn {
+      display: flex; align-items: center; gap: 8px;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.8rem; font-weight: 500;
+      color: rgba(255,255,255,0.5);
+      cursor: pointer; transition: all 0.15s;
+      text-decoration: none;
+    }
+    .logout-btn:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.9); }
+
+    /* ── MAIN ── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      padding: 2rem 2.5rem;
+      max-width: 1000px;
+    }
+
+    .page-header { margin-bottom: 2rem; }
+    .greeting {
+      font-family: var(--font-display);
+      font-size: 1.7rem; font-weight: 900;
+      color: var(--green); margin-bottom: 0.2rem;
+    }
+    .greeting em { font-style: normal; color: var(--amber); }
+    .sub-greeting { font-size: 0.9rem; color: var(--gray-600); }
+
+    /* ── STAT CARDS ── */
+    .stat-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1rem; margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: var(--warm-white);
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
+      border: 1px solid var(--gray-200);
+    }
+    .stat-card-label {
+      font-size: 0.75rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--gray-400); margin-bottom: 0.5rem;
+    }
+    .stat-card-num {
+      font-family: var(--font-display);
+      font-size: 2rem; font-weight: 900;
+      color: var(--green); line-height: 1;
+      margin-bottom: 0.2rem;
+    }
+    .stat-card-detail { font-size: 0.78rem; color: var(--gray-600); }
+
+    /* ── POST LISTING CARD ── */
+    .card {
+      background: var(--warm-white);
+      border-radius: 16px;
+      border: 1px solid var(--gray-200);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .card-title {
+      font-family: var(--font-display);
+      font-size: 1.1rem; font-weight: 700;
+      color: var(--green); margin-bottom: 0.3rem;
+    }
+    .card-subtitle { font-size: 0.85rem; color: var(--gray-600); margin-bottom: 1.5rem; }
+
+    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .field label { font-size: 0.82rem; font-weight: 600; color: var(--gray-900); }
+    .field label .req { color: var(--amber); margin-left: 2px; }
+    .field input, .field select, .field textarea {
+      font-family: var(--font-body); font-size: 0.9rem;
+      padding: 0.65rem 0.9rem;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 8px;
+      background: #fff; color: var(--gray-900);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      width: 100%; outline: none;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color: var(--green-light);
+      box-shadow: 0 0 0 3px rgba(82,183,136,0.15);
+    }
+    .field textarea { resize: vertical; min-height: 80px; }
+    .field select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 12px center; padding-right: 2rem;
+    }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    .btn-post {
+      background: var(--amber); color: #fff;
+      border: none; padding: 0.75rem 1.75rem;
+      border-radius: 10px;
+      font-family: var(--font-body); font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; transition: background 0.18s, transform 0.1s;
+    }
+    .btn-post:hover { background: #d4603f; transform: translateY(-1px); }
+    .btn-post:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* ── LISTINGS TABLE ── */
+    .section-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .section-head h2 {
+      font-family: var(--font-display);
+      font-size: 1.1rem; font-weight: 700; color: var(--green);
+    }
+    .empty-state {
+      text-align: center; padding: 3rem 2rem;
+      color: var(--gray-400); font-size: 0.9rem;
+    }
+    .empty-emoji { font-size: 2.5rem; margin-bottom: 0.75rem; }
+
+    .listing-item {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 1rem;
+      border-radius: 10px;
+      border: 1px solid var(--gray-200);
+      background: #fff;
+      margin-bottom: 10px;
+      transition: border-color 0.15s;
+    }
+    .listing-item:hover { border-color: var(--green-light); }
+    .listing-icon {
+      width: 42px; height: 42px; border-radius: 10px;
+      background: var(--amber-pale);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; flex-shrink: 0;
+    }
+    .listing-info { flex: 1; overflow: hidden; }
+    .listing-name { font-weight: 600; font-size: 0.9rem; margin-bottom: 2px; }
+    .listing-meta { font-size: 0.77rem; color: var(--gray-600); }
+    .listing-badge {
+      font-size: 0.72rem; font-weight: 600;
+      padding: 4px 10px; border-radius: 999px;
+      flex-shrink: 0;
+    }
+    .badge-active  { background: var(--green-pale); color: var(--green-mid); }
+    .badge-claimed { background: var(--amber-pale); color: #c05a3e; }
+    .badge-expired { background: var(--gray-100); color: var(--gray-600); }
+
+    .alert {
+      padding: 0.75rem 1rem; border-radius: 8px;
+      font-size: 0.85rem; margin-bottom: 1rem; display: none;
+    }
+    .alert.show { display: block; }
+    .alert-success { background: var(--green-pale); color: var(--green); border: 1px solid var(--green-light); }
+    .alert-error   { background: #fef2f2; color: var(--red); border: 1px solid #fecaca; }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; padding: 1.25rem; }
+      .stat-grid { grid-template-columns: 1fr 1fr; }
+      .field-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="{{ url_for('index') }}" class="sidebar-logo">Anna<span>Daan</span></a>
+    <div class="sidebar-role">🏛️ Donor</div>
+    <nav class="sidebar-nav">
+      <a class="nav-item active" onclick="showSection('overview')">
+        <span class="nav-icon">📊</span> Overview
+      </a>
+      <a class="nav-item" onclick="showSection('post')">
+        <span class="nav-icon">➕</span> Post food listing
+      </a>
+      <a class="nav-item" onclick="showSection('listings')">
+        <span class="nav-icon">📋</span> My listings
+      </a>
+      <a class="nav-item" onclick="showSection('impact')">
+        <span class="nav-icon">🌱</span> My impact
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="user-avatar">{{ user.contact_name[0].upper() if user.contact_name else user.email[0].upper() }}</div>
+        <div class="user-info">
+          <div class="user-name">{{ user.contact_name or 'Donor' }}</div>
+          <div class="user-email">{{ user.email }}</div>
+        </div>
+      </div>
+      <a href="{{ url_for('logout') }}" class="logout-btn">
+        <span>↩</span> Log out
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- OVERVIEW SECTION -->
+    <section id="sec-overview">
+      <div class="page-header">
+        <div class="greeting">
+          Welcome back, <em>{{ user.org_name or user.contact_name or 'Donor' }}</em> 👋
+        </div>
+        <div class="sub-greeting">Here's your food rescue impact at a glance.</div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-card-label">Total listings posted</div>
+          <div class="stat-card-num">0</div>
+          <div class="stat-card-detail">Get started below ↓</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Meals rescued</div>
+          <div class="stat-card-num">0</div>
+          <div class="stat-card-detail">Servings claimed by NGOs</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">NGOs reached</div>
+          <div class="stat-card-num">0</div>
+          <div class="stat-card-detail">Organisations served</div>
+        </div>
+      </div>
+
+      <div class="card" style="border-left: 4px solid var(--amber);">
+        <div class="card-title">🍽️ Ready to post your first listing?</div>
+        <div class="card-subtitle">Tell nearby NGOs about your surplus food. It takes under 2 minutes.</div>
+        <button class="btn-post" onclick="showSection('post')">Post food listing →</button>
+      </div>
+    </section>
+
+    <!-- POST LISTING SECTION -->
+    <section id="sec-post" style="display:none;">
+      <div class="page-header">
+        <div class="greeting">Post a food listing</div>
+        <div class="sub-greeting">Nearby NGOs will be notified instantly.</div>
+      </div>
+
+      <div class="alert" id="post-alert"></div>
+
+      <div class="card">
+        <div class="card-title">Food details</div>
+        <div class="card-subtitle">Tell NGOs what's available, how much, and when to pick it up.</div>
+
+        <form id="listing-form">
+          <div class="field">
+            <label for="food-name">Food name / description <span class="req">*</span></label>
+            <input type="text" id="food-name" placeholder="e.g. Biryani, Dal, Roti, Mixed sabzi" required />
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="qty">Approximate servings <span class="req">*</span></label>
+              <input type="number" id="qty" placeholder="e.g. 200" min="1" required />
+            </div>
+            <div class="field">
+              <label for="food-type">Food type</label>
+              <select id="food-type">
+                <option value="">Select type</option>
+                <option>Cooked food (hot)</option>
+                <option>Cooked food (room temp)</option>
+                <option>Raw ingredients</option>
+                <option>Packaged / sealed</option>
+                <option>Baked goods</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="pickup-by">Pickup deadline</label>
+              <input type="datetime-local" id="pickup-by" />
+            </div>
+            <div class="field">
+              <label for="contact-phone">Contact number</label>
+              <input type="tel" id="contact-phone" placeholder="+91 98765 43210" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="notes">Additional notes</label>
+            <textarea id="notes" placeholder="Any allergies, packing available, access instructions…"></textarea>
+          </div>
+
+          <button type="submit" class="btn-post" id="post-btn">🍽️ Post listing now</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- MY LISTINGS SECTION -->
+    <section id="sec-listings" style="display:none;">
+      <div class="page-header">
+        <div class="greeting">My listings</div>
+        <div class="sub-greeting">All food you've posted on AnnaDaan.</div>
+      </div>
+
+      <div class="section-head">
+        <h2>Recent listings</h2>
+        <button class="btn-post" style="padding:0.5rem 1rem;font-size:0.82rem;" onclick="showSection('post')">+ New listing</button>
+      </div>
+
+      <div id="listings-container">
+        <div class="empty-state">
+          <div class="empty-emoji">📋</div>
+          <div>No listings yet. <a href="#" onclick="showSection('post')" style="color:var(--amber);font-weight:600;">Post your first one →</a></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- IMPACT SECTION -->
+    <section id="sec-impact" style="display:none;">
+      <div class="page-header">
+        <div class="greeting">My impact</div>
+        <div class="sub-greeting">Track the meals you've helped rescue.</div>
+      </div>
+
+      <div class="card" style="text-align:center; padding: 3rem 2rem;">
+        <div style="font-size:3rem; margin-bottom:1rem;">🌱</div>
+        <div style="font-family:var(--font-display);font-size:1.3rem;font-weight:700;color:var(--green);margin-bottom:0.5rem;">
+          Your impact story starts here
+        </div>
+        <div style="color:var(--gray-600);font-size:0.9rem;max-width:340px;margin:0 auto 1.5rem;">
+          Once NGOs claim your listings, every rescued meal will appear here on your personal impact dashboard.
+        </div>
+        <button class="btn-post" onclick="showSection('post')">Post your first listing</button>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    function showSection(name) {
+      ['overview','post','listings','impact'].forEach(s => {
+        document.getElementById('sec-' + s).style.display = s === name ? 'block' : 'none'
+      })
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'))
+      const map = { overview: 0, post: 1, listings: 2, impact: 3 }
+      document.querySelectorAll('.nav-item')[map[name]].classList.add('active')
+    }
+
+    // Post listing form handler
+    document.getElementById('listing-form').addEventListener('submit', async (e) => {
+      e.preventDefault()
+      const btn = document.getElementById('post-btn')
+      btn.disabled = true
+      btn.textContent = 'Posting…'
+
+      // Simulate post — replace with real fetch('/api/listings', ...) when backend route is ready
+      await new Promise(r => setTimeout(r, 900))
+
+      const alert = document.getElementById('post-alert')
+      alert.className = 'alert alert-success show'
+      alert.textContent = '✅ Listing posted! Nearby NGOs have been notified.'
+      alert.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+
+      document.getElementById('listing-form').reset()
+      btn.disabled = false
+      btn.textContent = '🍽️ Post listing now'
+    })
+  </script>
+
+</body>
+</html>

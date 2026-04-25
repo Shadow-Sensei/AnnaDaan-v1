@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Up — AnnaDaan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    :root {
+      --green:       #1a4731;
+      --green-mid:   #2d6a4f;
+      --green-light: #52b788;
+      --green-pale:  #d8f3dc;
+      --amber:       #e76f51;
+      --amber-pale:  #fef3ee;
+      --cream:       #faf7f2;
+      --warm-white:  #fffdf9;
+      --gray-100:    #f3f4f6;
+      --gray-200:    #e5e7eb;
+      --gray-400:    #9ca3af;
+      --gray-600:    #6b7280;
+      --gray-900:    #111827;
+      --red:         #dc2626;
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body:    'DM Sans', system-ui, sans-serif;
+      --radius:       12px;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--cream);
+      color: var(--gray-900);
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    /* ── LEFT PANEL ── */
+    .left-panel {
+      background: var(--green);
+      display: flex; flex-direction: column;
+      justify-content: space-between;
+      padding: 2.5rem;
+      position: sticky; top: 0; height: 100vh;
+    }
+    .logo {
+      font-family: var(--font-display);
+      font-size: 1.5rem; font-weight: 900;
+      color: #fff; text-decoration: none;
+    }
+    .logo span { color: var(--amber); }
+
+    .left-content { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+    .left-headline {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 3vw, 2.8rem);
+      font-weight: 900; color: #fff;
+      line-height: 1.15; margin-bottom: 1rem;
+    }
+    .left-headline em { font-style: normal; color: var(--amber); }
+    .left-sub {
+      font-size: 0.95rem; color: rgba(255,255,255,0.65);
+      line-height: 1.7; max-width: 340px; margin-bottom: 2.5rem;
+    }
+
+    .feature-list { display: flex; flex-direction: column; gap: 1rem; }
+    .feature-item {
+      display: flex; align-items: flex-start; gap: 12px;
+    }
+    .feature-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; flex-shrink: 0;
+    }
+    .feature-text strong { display: block; font-size: 0.88rem; color: #fff; font-weight: 600; }
+    .feature-text span  { font-size: 0.8rem; color: rgba(255,255,255,0.55); }
+
+    .left-footer {
+      font-size: 0.78rem; color: rgba(255,255,255,0.35);
+    }
+
+    /* ── RIGHT PANEL ── */
+    .right-panel {
+      overflow-y: auto;
+      padding: 2.5rem 3rem;
+      display: flex; flex-direction: column; justify-content: center;
+      min-height: 100vh;
+    }
+    .form-header { margin-bottom: 2rem; }
+    .form-header h1 {
+      font-family: var(--font-display);
+      font-size: 1.9rem; font-weight: 900;
+      color: var(--green); margin-bottom: 0.35rem;
+    }
+    .form-header p { font-size: 0.9rem; color: var(--gray-600); }
+    .form-header p a { color: var(--amber); font-weight: 600; text-decoration: none; }
+    .form-header p a:hover { text-decoration: underline; }
+
+    /* ── ROLE TOGGLE ── */
+    .role-toggle {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px; margin-bottom: 2rem;
+    }
+    .role-btn {
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius);
+      padding: 1rem;
+      cursor: pointer; background: #fff;
+      transition: all 0.18s;
+      text-align: left;
+    }
+    .role-btn:hover { border-color: var(--green-light); }
+    .role-btn.active {
+      border-color: var(--green);
+      background: var(--green-pale);
+    }
+    .role-emoji { font-size: 1.6rem; display: block; margin-bottom: 6px; }
+    .role-name { font-weight: 700; font-size: 0.9rem; color: var(--gray-900); display: block; }
+    .role-desc { font-size: 0.75rem; color: var(--gray-600); display: block; margin-top: 2px; }
+    .role-btn.active .role-name { color: var(--green); }
+
+    /* ── FORM ── */
+    .form-section-title {
+      font-size: 0.72rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.07em;
+      color: var(--gray-400); margin: 1.5rem 0 0.75rem;
+    }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+    .field label {
+      font-size: 0.82rem; font-weight: 600; color: var(--gray-900);
+    }
+    .field label .req { color: var(--amber); margin-left: 2px; }
+    .field input,
+    .field select,
+    .field textarea {
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      padding: 0.65rem 0.9rem;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--gray-900);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      width: 100%;
+      outline: none;
+    }
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: var(--green-light);
+      box-shadow: 0 0 0 3px rgba(82,183,136,0.15);
+    }
+    .field input.error { border-color: var(--red); }
+    .field-error { font-size: 0.75rem; color: var(--red); display: none; }
+    .field-error.show { display: block; }
+    .field textarea { resize: vertical; min-height: 80px; }
+    .field select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 2rem; }
+
+    /* NGO-only fields — hidden by default */
+    .ngo-only { display: none; }
+    .ngo-only.show { display: block; }
+    .field-row.ngo-only { display: none; }
+    .field-row.ngo-only.show { display: grid; }
+
+    /* Password strength */
+    .pw-wrap { position: relative; }
+    .pw-toggle {
+      position: absolute; right: 10px; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      color: var(--gray-400); font-size: 0.8rem; font-weight: 500;
+    }
+    .pw-strength { display: flex; gap: 4px; margin-top: 6px; }
+    .pw-bar {
+      height: 3px; flex: 1; border-radius: 2px;
+      background: var(--gray-200); transition: background 0.2s;
+    }
+    .pw-bar.weak   { background: var(--red); }
+    .pw-bar.medium { background: var(--amber); }
+    .pw-bar.strong { background: var(--green-light); }
+    .pw-label { font-size: 0.72rem; color: var(--gray-400); margin-top: 4px; }
+
+    /* Terms */
+    .terms-row {
+      display: flex; align-items: flex-start; gap: 10px;
+      margin: 1.25rem 0;
+    }
+    .terms-row input[type="checkbox"] {
+      width: 16px; height: 16px; margin-top: 2px;
+      accent-color: var(--green); cursor: pointer; flex-shrink: 0;
+    }
+    .terms-row label {
+      font-size: 0.82rem; color: var(--gray-600); line-height: 1.5; cursor: pointer;
+    }
+    .terms-row label a { color: var(--green); font-weight: 600; }
+
+    /* Submit */
+    .btn-submit {
+      width: 100%;
+      background: var(--green);
+      color: #fff;
+      border: none;
+      padding: 0.85rem;
+      border-radius: var(--radius);
+      font-family: var(--font-body);
+      font-size: 1rem; font-weight: 700;
+      cursor: pointer;
+      transition: background 0.18s, transform 0.12s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-submit:hover { background: var(--green-mid); transform: translateY(-1px); }
+    .btn-submit:active { transform: translateY(0); }
+    .btn-submit:disabled { background: var(--gray-400); cursor: not-allowed; transform: none; }
+
+    /* Divider */
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 1.25rem 0;
+      font-size: 0.78rem; color: var(--gray-400);
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--gray-200);
+    }
+
+    /* Google btn */
+    .btn-google {
+      width: 100%;
+      background: #fff;
+      border: 1.5px solid var(--gray-200);
+      border-radius: var(--radius);
+      padding: 0.75rem;
+      font-family: var(--font-body);
+      font-size: 0.9rem; font-weight: 600;
+      color: var(--gray-900);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .btn-google:hover { background: var(--gray-100); border-color: var(--gray-400); }
+    .google-icon { width: 18px; height: 18px; }
+
+    /* Alert */
+    .alert {
+      padding: 0.75rem 1rem; border-radius: 8px;
+      font-size: 0.85rem; font-weight: 500;
+      margin-bottom: 1rem; display: none;
+    }
+    .alert.show { display: block; }
+    .alert-error   { background: #fef2f2; color: var(--red);   border: 1px solid #fecaca; }
+    .alert-success { background: var(--green-pale); color: var(--green); border: 1px solid #a7f3d0; }
+
+    /* Progress dots */
+    .progress-steps {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 2rem;
+    }
+    .prog-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--gray-200); transition: all 0.2s;
+    }
+    .prog-dot.active { background: var(--green); width: 24px; border-radius: 4px; }
+    .prog-dot.done   { background: var(--green-light); }
+    .prog-label { font-size: 0.78rem; color: var(--gray-400); margin-left: 4px; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      body { grid-template-columns: 1fr; }
+      .left-panel { display: none; }
+      .right-panel { padding: 2rem 1.5rem; }
+      .field-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <a href="/index.html" class="logo">Anna<span>Daan</span></a>
+
+    <div class="left-content">
+      <h2 class="left-headline">Every plate<br>counts. Every<br><em>meal matters.</em></h2>
+      <p class="left-sub">
+        Join a growing network turning surplus food from events and canteens into meals for people who need them most.
+      </p>
+      <div class="feature-list">
+        <div class="feature-item">
+          <div class="feature-icon">⚡</div>
+          <div class="feature-text">
+            <strong>Real-time alerts</strong>
+            <span>NGOs notified the moment food is posted</span>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">📍</div>
+          <div class="feature-text">
+            <strong>Location-aware</strong>
+            <span>Match donors and receivers by city and area</span>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">📊</div>
+          <div class="feature-text">
+            <strong>Track your impact</strong>
+            <span>See meals rescued and food saved over time</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="left-footer">© 2026 AnnaDaan — Open source & free to use</div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div style="max-width: 460px; width: 100%; margin: 0 auto;">
+
+      <div class="form-header">
+        <h1>Create your account</h1>
+        <p>Already registered? <a href="login.html">Log in here</a></p>
+      </div>
+
+      <!-- Progress -->
+      <div class="progress-steps">
+        <div class="prog-dot active" id="dot1"></div>
+        <div class="prog-dot" id="dot2"></div>
+        <div class="prog-dot" id="dot3"></div>
+        <span class="prog-label" id="prog-label">Step 1 of 3 — Choose your role</span>
+      </div>
+
+      <!-- Alert -->
+      <div class="alert alert-error" id="alert"></div>
+
+      <form id="signup-form" novalidate>
+
+        <!-- STEP 1: Role selection -->
+        <div id="step1">
+          <div class="form-section-title">I want to join as</div>
+          <div class="role-toggle">
+            <button type="button" class="role-btn active" data-role="donor" id="role-donor">
+              <span class="role-emoji">🏛️</span>
+              <span class="role-name">Food Donor</span>
+              <span class="role-desc">Wedding hall, canteen, event organiser</span>
+            </button>
+            <button type="button" class="role-btn" data-role="ngo" id="role-ngo">
+              <span class="role-emoji">❤️</span>
+              <span class="role-name">NGO / SHG</span>
+              <span class="role-desc">We serve meals to people in need</span>
+            </button>
+          </div>
+          <button type="button" class="btn-submit" id="next1">Continue →</button>
+        </div>
+
+        <!-- STEP 2: Account details -->
+        <div id="step2" style="display:none;">
+          <div class="form-section-title">Account credentials</div>
+
+          <div class="field">
+            <label for="email">Email address <span class="req">*</span></label>
+            <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" />
+            <span class="field-error" id="email-err">Please enter a valid email</span>
+          </div>
+
+          <div class="field">
+            <label for="password">Password <span class="req">*</span></label>
+            <div class="pw-wrap">
+              <input type="password" id="password" name="password" placeholder="Min. 8 characters" autocomplete="new-password" />
+              <button type="button" class="pw-toggle" id="pw-toggle">Show</button>
+            </div>
+            <div class="pw-strength">
+              <div class="pw-bar" id="bar1"></div>
+              <div class="pw-bar" id="bar2"></div>
+              <div class="pw-bar" id="bar3"></div>
+              <div class="pw-bar" id="bar4"></div>
+            </div>
+            <div class="pw-label" id="pw-label">Enter a password</div>
+            <span class="field-error" id="pw-err">Password must be at least 8 characters</span>
+          </div>
+
+          <div class="field">
+            <label for="confirm-password">Confirm password <span class="req">*</span></label>
+            <input type="password" id="confirm-password" name="confirm-password" placeholder="Repeat password" autocomplete="new-password" />
+            <span class="field-error" id="cpw-err">Passwords do not match</span>
+          </div>
+
+          <div class="divider">or sign up with</div>
+          <button type="button" class="btn-google" id="google-btn">
+            <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            Continue with Google
+          </button>
+
+          <div style="display:flex; gap:10px; margin-top:1.25rem;">
+            <button type="button" class="btn-submit" style="background:transparent;color:var(--green);border:2px solid var(--green);flex:0 0 auto;width:auto;padding:0.75rem 1.25rem;" id="back1">← Back</button>
+            <button type="button" class="btn-submit" id="next2">Continue →</button>
+          </div>
+        </div>
+
+        <!-- STEP 3: Organisation details -->
+        <div id="step3" style="display:none;">
+          <div class="form-section-title">Your organisation</div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="org-name">Organisation name <span class="req">*</span></label>
+              <input type="text" id="org-name" placeholder="e.g. Grand Leela Banquets" />
+              <span class="field-error" id="org-err">Required</span>
+            </div>
+            <div class="field">
+              <label for="contact-name">Your name <span class="req">*</span></label>
+              <input type="text" id="contact-name" placeholder="Full name" />
+              <span class="field-error" id="contact-err">Required</span>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="phone">Phone number</label>
+              <input type="tel" id="phone" placeholder="+91 98765 43210" />
+            </div>
+            <div class="field">
+              <label for="city">City <span class="req">*</span></label>
+              <select id="city">
+                <option value="">Select city</option>
+                <option>Bengaluru</option>
+                <option>Mumbai</option>
+                <option>Delhi</option>
+                <option>Chennai</option>
+                <option>Hyderabad</option>
+                <option>Pune</option>
+                <option>Kolkata</option>
+                <option>Ahmedabad</option>
+                <option>Jaipur</option>
+                <option>Other</option>
+              </select>
+              <span class="field-error" id="city-err">Please select a city</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="address">Address / Area</label>
+            <input type="text" id="address" placeholder="Street, locality, landmark" />
+          </div>
+
+          <!-- NGO-only fields -->
+          <div id="ngo-section" class="ngo-only">
+            <div class="form-section-title">NGO / SHG details</div>
+            <div class="field-row ngo-only show" style="display:grid;">
+              <div class="field">
+                <label for="reg-no">Registration number</label>
+                <input type="text" id="reg-no" placeholder="e.g. MH/12345/2019" />
+              </div>
+              <div class="field">
+                <label for="capacity">Daily capacity (servings)</label>
+                <input type="number" id="capacity" placeholder="e.g. 500" min="1" />
+              </div>
+            </div>
+            <div class="field">
+              <label for="area-served">Areas you serve</label>
+              <input type="text" id="area-served" placeholder="e.g. Koramangala, BTM Layout, HSR Layout" />
+            </div>
+          </div>
+
+          <!-- Donor type selector -->
+          <div id="donor-section">
+            <div class="form-section-title">Venue type</div>
+            <div class="field">
+              <label for="venue-type">What best describes your organisation?</label>
+              <select id="venue-type">
+                <option value="">Select type</option>
+                <option>Wedding / Banquet Hall</option>
+                <option>Corporate Canteen</option>
+                <option>College Canteen</option>
+                <option>Restaurant / Hotel</option>
+                <option>Event Management Company</option>
+                <option>Religious / Community Hall</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="terms-row">
+            <input type="checkbox" id="terms" />
+            <label for="terms">
+              I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>. I confirm that the food I post will be safe for consumption.
+            </label>
+          </div>
+
+          <div style="display:flex; gap:10px;">
+            <button type="button" class="btn-submit" style="background:transparent;color:var(--green);border:2px solid var(--green);flex:0 0 auto;width:auto;padding:0.75rem 1.25rem;" id="back2">← Back</button>
+            <button type="submit" class="btn-submit" id="submit-btn">Create account ✓</button>
+          </div>
+        </div>
+
+
+        <!-- Hidden inputs for native form POST -->
+        <input type="hidden" id="h-role"         name="role" />
+        <input type="hidden" id="h-email"        name="email" />
+        <input type="hidden" id="h-password"     name="password" />
+        <input type="hidden" id="h-org-name"     name="org_name" />
+        <input type="hidden" id="h-contact-name" name="contact_name" />
+        <input type="hidden" id="h-phone"        name="phone" />
+        <input type="hidden" id="h-city"         name="city" />
+        <input type="hidden" id="h-ngo-reg"      name="ngo_reg_number" />
+        <input type="hidden" id="h-capacity"     name="capacity" />
+        <input type="hidden" id="h-area-served"  name="area_served" />
+        <input type="hidden" id="h-venue-type"   name="venue_type" />
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ── State ──────────────────────────────────────────
+    let currentRole = 'donor'
+    let currentStep = 1
+
+    // ── Role toggle ────────────────────────────────────
+    document.querySelectorAll('.role-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'))
+        btn.classList.add('active')
+        currentRole = btn.dataset.role
+      })
+    })
+
+    // ── Step navigation ────────────────────────────────
+    function goToStep(n) {
+      [1, 2, 3].forEach(i => {
+        document.getElementById('step' + i).style.display = i === n ? 'block' : 'none'
+      })
+      currentStep = n
+      updateProgress(n)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+
+    function updateProgress(step) {
+      const labels = ['Step 1 of 3 — Choose your role', 'Step 2 of 3 — Account credentials', 'Step 3 of 3 — Organisation details']
+      document.getElementById('prog-label').textContent = labels[step - 1]
+      ;[1, 2, 3].forEach(i => {
+        const dot = document.getElementById('dot' + i)
+        dot.className = 'prog-dot' + (i === step ? ' active' : i < step ? ' done' : '')
+      })
+    }
+
+    document.getElementById('next1').addEventListener('click', () => goToStep(2))
+    document.getElementById('back1').addEventListener('click', () => goToStep(1))
+    document.getElementById('next2').addEventListener('click', () => {
+      if (!validateStep2()) return
+      goToStep(3)
+      // show/hide role-specific fields
+      const ngoSec = document.getElementById('ngo-section')
+      const donorSec = document.getElementById('donor-section')
+      if (currentRole === 'ngo') {
+        ngoSec.classList.add('show')
+        donorSec.style.display = 'none'
+      } else {
+        ngoSec.classList.remove('show')
+        donorSec.style.display = 'block'
+      }
+    })
+    document.getElementById('back2').addEventListener('click', () => goToStep(2))
+
+    // ── Password strength ──────────────────────────────
+    const pwInput = document.getElementById('password')
+    const bars    = [1, 2, 3, 4].map(i => document.getElementById('bar' + i))
+    const pwLabel = document.getElementById('pw-label')
+    const levels  = ['Too short', 'Weak', 'Medium', 'Strong']
+    const colors  = ['weak', 'weak', 'medium', 'strong']
+
+    pwInput.addEventListener('input', () => {
+      const v = pwInput.value
+      let score = 0
+      if (v.length >= 8)  score++
+      if (/[A-Z]/.test(v)) score++
+      if (/[0-9]/.test(v)) score++
+      if (/[^A-Za-z0-9]/.test(v)) score++
+      bars.forEach((bar, i) => {
+        bar.className = 'pw-bar' + (i < score ? ' ' + colors[score - 1] : '')
+      })
+      pwLabel.textContent = v.length === 0 ? 'Enter a password' : levels[score - 1] || 'Strong'
+    })
+
+    // Show/hide password
+    document.getElementById('pw-toggle').addEventListener('click', function () {
+      const inp = document.getElementById('password')
+      const isText = inp.type === 'text'
+      inp.type = isText ? 'password' : 'text'
+      this.textContent = isText ? 'Show' : 'Hide'
+    })
+
+    // ── Validation ─────────────────────────────────────
+    function showErr(id, errId, show) {
+      const inp = document.getElementById(id)
+      const err = document.getElementById(errId)
+      if (show) { inp.classList.add('error'); err.classList.add('show') }
+      else       { inp.classList.remove('error'); err.classList.remove('show') }
+      return !show
+    }
+
+    function validateStep2() {
+      const email = document.getElementById('email').value.trim()
+      const pw    = document.getElementById('password').value
+      const cpw   = document.getElementById('confirm-password').value
+      let ok = true
+      ok = showErr('email', 'email-err', !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) && ok
+      ok = showErr('password', 'pw-err', pw.length < 8) && ok
+      ok = showErr('confirm-password', 'cpw-err', pw !== cpw) && ok
+      return ok
+    }
+
+    function validateStep3() {
+      const org     = document.getElementById('org-name').value.trim()
+      const contact = document.getElementById('contact-name').value.trim()
+      const city    = document.getElementById('city').value
+      const terms   = document.getElementById('terms').checked
+      let ok = true
+      ok = showErr('org-name', 'org-err', !org) && ok
+      ok = showErr('contact-name', 'contact-err', !contact) && ok
+      ok = showErr('city', 'city-err', !city) && ok
+      if (!terms) {
+        showAlert('Please accept the terms and conditions to continue.', 'error')
+        ok = false
+      }
+      return ok
+    }
+
+    function showAlert(msg, type) {
+      const el = document.getElementById('alert')
+      el.textContent = msg
+      el.className = 'alert alert-' + type + ' show'
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }
+
+    // ── Form submit → native POST (session cookie set server-side) ──
+    document.getElementById('signup-form').addEventListener('submit', (e) => {
+      e.preventDefault()
+      if (!validateStep3()) return
+
+      const btn = document.getElementById('submit-btn')
+      btn.disabled = true
+      btn.textContent = 'Creating account…'
+
+      // Write collected values into hidden inputs so Flask receives them
+      document.getElementById('h-role').value         = currentRole
+      document.getElementById('h-email').value        = document.getElementById('email').value.trim()
+      document.getElementById('h-password').value     = document.getElementById('password').value
+      document.getElementById('h-org-name').value     = document.getElementById('org-name').value.trim()
+      document.getElementById('h-contact-name').value = document.getElementById('contact-name').value.trim()
+      document.getElementById('h-phone').value        = document.getElementById('phone').value.trim()
+      document.getElementById('h-city').value         = document.getElementById('city').value
+      document.getElementById('h-ngo-reg').value      = currentRole === 'ngo' ? document.getElementById('ngo-reg').value.trim() : ''
+      document.getElementById('h-capacity').value     = currentRole === 'ngo' ? document.getElementById('capacity').value : ''
+      document.getElementById('h-area-served').value  = currentRole === 'ngo' ? document.getElementById('area-served').value.trim() : ''
+      document.getElementById('h-venue-type').value   = currentRole === 'donor' ? document.getElementById('venue-type').value : ''
+
+      // Real form POST — Flask sets the session cookie + redirects in one go
+      document.getElementById('signup-form').setAttribute('method', 'POST')
+      document.getElementById('signup-form').setAttribute('action', '/signup')
+      document.getElementById('signup-form').submit()
+    })
+
+    // Google OAuth placeholder
+    document.getElementById('google-btn').addEventListener('click', () => {
+      showAlert('Google sign-in coming soon.', 'error')
+    })
+
+    // ── Read role from URL param (?role=ngo) ───────────
+    const urlRole = new URLSearchParams(window.location.search).get('role')
+    if (urlRole === 'ngo') {
+      document.getElementById('role-ngo').click()
+    }
+  </script>
+
+</body>
+</html>

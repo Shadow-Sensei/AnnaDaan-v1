@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AnnaDaan — Rescue Food. Feed People.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    :root {
+      --green:       #1a4731;
+      --green-mid:   #2d6a4f;
+      --green-light: #52b788;
+      --green-pale:  #d8f3dc;
+      --amber:       #e76f51;
+      --amber-pale:  #fef3ee;
+      --cream:       #faf7f2;
+      --warm-white:  #fffdf9;
+      --bark:        #5c3d2e;
+      --gray:        #6b7280;
+      --dark:        #111;
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body:    'DM Sans', system-ui, sans-serif;
+      --radius:       12px;
+      --max:          1140px;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--cream);
+      color: var(--dark);
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2rem;
+      background: rgba(250,247,242,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .nav-logo {
+      font-family: var(--font-display);
+      font-size: 1.4rem; font-weight: 900;
+      color: var(--green);
+      letter-spacing: -0.5px;
+    }
+    .nav-logo span { color: var(--amber); }
+    .nav-links { display: flex; align-items: center; gap: 1.5rem; }
+    .nav-links a {
+      font-size: 0.9rem; font-weight: 500; color: var(--gray);
+      transition: color 0.2s;
+      text-decoration: none;
+    }
+    .nav-links a:hover { color: var(--green); }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 0.55rem 1.2rem;
+      border-radius: 999px;
+      font-size: 0.88rem; font-weight: 600;
+      cursor: pointer; transition: all 0.18s;
+      border: 2px solid transparent;
+      text-decoration: none;
+    }
+    .btn-green  { background: var(--green); color: #fff; }
+    .btn-green:hover { background: var(--green-mid); transform: translateY(-1px); }
+    .btn-outline { border-color: var(--green); color: var(--green); background: transparent; }
+    .btn-outline:hover { background: var(--green-pale); }
+    .btn-amber  { background: var(--amber); color: #fff; }
+    .btn-amber:hover { background: #d4603f; transform: translateY(-1px); }
+    .btn-lg { padding: 0.8rem 2rem; font-size: 1rem; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 7rem 2rem 4rem;
+      gap: 3rem;
+    }
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--green-pale);
+      color: var(--green-mid);
+      font-size: 0.78rem; font-weight: 600;
+      padding: 6px 14px; border-radius: 999px;
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .hero-tag::before {
+      content: ''; width: 7px; height: 7px;
+      border-radius: 50%; background: var(--green-light);
+      animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.4); }
+    }
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2.4rem, 4.5vw, 3.6rem);
+      font-weight: 900;
+      line-height: 1.12;
+      color: var(--green);
+      margin-bottom: 1.25rem;
+    }
+    .hero h1 em {
+      font-style: normal;
+      color: var(--amber);
+    }
+    .hero-sub {
+      font-size: 1.1rem; line-height: 1.7;
+      color: var(--gray);
+      max-width: 480px;
+      margin-bottom: 2rem;
+    }
+    .hero-cta { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 3rem; }
+    .hero-stats {
+      display: flex; gap: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(0,0,0,0.08);
+    }
+    .stat-num {
+      font-family: var(--font-display);
+      font-size: 1.8rem; font-weight: 900;
+      color: var(--green);
+      display: block;
+    }
+    .stat-label { font-size: 0.78rem; color: var(--gray); font-weight: 500; }
+
+    /* Hero visual */
+    .hero-visual {
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .hero-card-stack { position: relative; width: 100%; max-width: 400px; margin: 0 auto; }
+    .food-card-demo {
+      background: var(--warm-white);
+      border-radius: 20px;
+      padding: 1.5rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+      position: relative; z-index: 2;
+      animation: floatUp 3s ease-in-out infinite;
+    }
+    @keyframes floatUp {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    .food-card-back {
+      position: absolute; top: 16px; left: 16px; right: -16px;
+      background: var(--green-pale);
+      border-radius: 20px; height: 100%;
+      z-index: 1;
+    }
+    .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
+    .card-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: var(--green-pale);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+    }
+    .card-org { font-weight: 600; font-size: 0.95rem; }
+    .card-type { font-size: 0.78rem; color: var(--gray); }
+    .card-food { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.4rem; color: var(--green); }
+    .card-qty { font-size: 0.85rem; color: var(--gray); margin-bottom: 1rem; }
+    .card-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.2rem; }
+    .pill {
+      font-size: 0.75rem; font-weight: 500;
+      padding: 4px 10px; border-radius: 999px;
+    }
+    .pill-green { background: var(--green-pale); color: var(--green-mid); }
+    .pill-amber { background: var(--amber-pale); color: var(--bark); }
+    .card-claim {
+      width: 100%;
+      background: var(--amber);
+      color: #fff;
+      border: none;
+      padding: 0.7rem;
+      border-radius: 10px;
+      font-weight: 600; font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.18s;
+    }
+    .card-claim:hover { background: #d4603f; }
+    /* Floating notification */
+    .notif-pop {
+      position: absolute; top: -18px; right: -20px; z-index: 10;
+      background: var(--warm-white);
+      border-radius: 14px;
+      padding: 10px 14px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.14);
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.8rem; font-weight: 500;
+      animation: popIn 0.4s ease 0.8s both;
+      white-space: nowrap;
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.8) translateY(8px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .notif-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green-light); flex-shrink: 0; }
+
+    /* ── HOW IT WORKS ── */
+    .section { max-width: var(--max); margin: 0 auto; padding: 5rem 2rem; }
+    .section-label {
+      font-size: 0.78rem; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--amber);
+      margin-bottom: 0.75rem;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      font-weight: 900; color: var(--green);
+      margin-bottom: 0.75rem; line-height: 1.2;
+    }
+    .section-sub { font-size: 1rem; color: var(--gray); max-width: 520px; }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem; margin-top: 3rem;
+    }
+    .step-card {
+      background: var(--warm-white);
+      border-radius: 18px;
+      padding: 2rem 1.5rem;
+      border: 1px solid rgba(0,0,0,0.06);
+      position: relative;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .step-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.08); }
+    .step-num {
+      font-family: var(--font-display);
+      font-size: 3rem; font-weight: 900;
+      color: var(--green-pale);
+      line-height: 1; margin-bottom: 1rem;
+    }
+    .step-emoji { font-size: 2rem; margin-bottom: 0.75rem; display: block; }
+    .step-title { font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem; color: var(--green); }
+    .step-desc  { font-size: 0.875rem; color: var(--gray); line-height: 1.6; }
+
+    /* ── WHO IS THIS FOR ── */
+    .who-section { background: var(--green); border-radius: 28px; padding: 4rem 3rem; }
+    .who-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2.5rem; }
+    .who-card {
+      background: rgba(255,255,255,0.08);
+      border-radius: 18px; padding: 2rem;
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+    .who-icon { font-size: 2.5rem; margin-bottom: 1rem; display: block; }
+    .who-title { font-family: var(--font-display); font-size: 1.4rem; font-weight: 900; color: #fff; margin-bottom: 0.5rem; }
+    .who-desc { font-size: 0.9rem; color: rgba(255,255,255,0.65); line-height: 1.7; margin-bottom: 1.5rem; }
+    .who-list { list-style: none; }
+    .who-list li {
+      font-size: 0.85rem; color: rgba(255,255,255,0.8);
+      padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .who-list li::before { content: '✓'; color: var(--green-light); font-weight: 700; }
+
+    /* ── IMPACT ── */
+    .impact-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem; margin-top: 3rem;
+    }
+    .impact-card {
+      background: var(--warm-white);
+      border-radius: 18px; padding: 2rem;
+      text-align: center;
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+    .impact-num {
+      font-family: var(--font-display);
+      font-size: 2.8rem; font-weight: 900;
+      color: var(--amber);
+    }
+    .impact-label { font-size: 0.875rem; color: var(--gray); margin-top: 4px; }
+
+    /* ── CTA STRIP ── */
+    .cta-strip {
+      background: var(--amber);
+      border-radius: 24px;
+      padding: 3.5rem 3rem;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 2rem; flex-wrap: wrap;
+    }
+    .cta-strip h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.5rem, 3vw, 2.2rem);
+      font-weight: 900; color: #fff; line-height: 1.2;
+    }
+    .cta-strip p { color: rgba(255,255,255,0.8); font-size: 0.95rem; margin-top: 0.4rem; }
+    .btn-white { background: #fff; color: var(--amber); border-color: #fff; }
+    .btn-white:hover { background: #fff3ee; }
+
+    /* ── FOOTER ── */
+    footer {
+      max-width: var(--max); margin: 0 auto;
+      padding: 2rem 2rem 3rem;
+      display: flex; align-items: center; justify-content: space-between;
+      border-top: 1px solid rgba(0,0,0,0.08);
+      font-size: 0.82rem; color: var(--gray);
+      flex-wrap: wrap; gap: 1rem;
+    }
+    .footer-logo { font-family: var(--font-display); font-weight: 900; color: var(--green); font-size: 1.1rem; }
+    .footer-logo span { color: var(--amber); }
+
+    /* ── ANIMATIONS ── */
+    .fade-in {
+      opacity: 0; transform: translateY(24px);
+      animation: fadeIn 0.7s ease forwards;
+    }
+    .fade-in:nth-child(1) { animation-delay: 0.1s; }
+    .fade-in:nth-child(2) { animation-delay: 0.25s; }
+    .fade-in:nth-child(3) { animation-delay: 0.4s; }
+    .fade-in:nth-child(4) { animation-delay: 0.55s; }
+    @keyframes fadeIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .hero { grid-template-columns: 1fr; padding-top: 6rem; }
+      .hero-visual { display: none; }
+      .who-grid { grid-template-columns: 1fr; }
+      .impact-grid { grid-template-columns: 1fr; }
+      .cta-strip { text-align: center; justify-content: center; }
+      nav { padding: 0.75rem 1.25rem; }
+      .nav-links .btn-outline { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">Anna<span>Daan</span></div>
+    <div class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="#who">For NGOs</a>
+      <a href="{{ url_for('login') }}" class="btn btn-outline">Log in</a>
+      <a href="{{ url_for('signup') }}" class="btn btn-green">Get started</a>
+
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-left">
+      <div class="fade-in">
+        <div class="hero-tag">Live food rescue network</div>
+      </div>
+      <div class="fade-in">
+        <h1>Don't waste it.<br><em>Feed someone</em><br>with it.</h1>
+      </div>
+      <div class="fade-in">
+        <p class="hero-sub">
+          AnnaDaan connects weddings, canteens, and events with nearby NGOs and self-help groups — turning surplus food into meals for people who need them, in real time.
+        </p>
+      </div>
+      <div class="fade-in">
+        <div class="hero-cta">
+          <a href="/signup?role=donor" class="btn btn-green btn-lg">I have food to donate</a>
+          <a href="/signup?role=ngo"   class="btn btn-amber btn-lg">I'm an NGO / SHG</a>
+        </div>
+        <div class="hero-stats">
+          <div>
+            <span class="stat-num">0</span>
+            <span class="stat-label">Meals rescued so far</span>
+          </div>
+          <div>
+            <span class="stat-num">0</span>
+            <span class="stat-label">NGOs registered</span>
+          </div>
+          <div>
+            <span class="stat-num">0</span>
+            <span class="stat-label">Cities covered</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hero card mockup -->
+    <div class="hero-visual">
+      <div class="hero-card-stack">
+        <div class="notif-pop">
+          <div class="notif-dot"></div>
+          Seva Foundation claimed this listing
+        </div>
+        <div class="food-card-demo">
+          <div class="card-header">
+            <div class="card-icon">🍽️</div>
+            <div>
+              <div class="card-org">Grand Leela Banquets</div>
+              <div class="card-type">Wedding • Bengaluru</div>
+            </div>
+          </div>
+          <div class="card-food">Biryani & Raita</div>
+          <div class="card-qty">~200 servings available</div>
+          <div class="card-meta">
+            <span class="pill pill-green">Cooked food</span>
+            <span class="pill pill-amber">Pickup by 10 PM</span>
+          </div>
+          <button class="card-claim">Claim this food →</button>
+        </div>
+        <div class="food-card-back"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="section" id="how">
+    <div class="section-label">Simple process</div>
+    <div class="section-title">From surplus to served<br>in minutes</div>
+    <p class="section-sub">No complicated logistics. Post, claim, and pick up — that's the whole flow.</p>
+
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <span class="step-emoji">📋</span>
+        <div class="step-title">Donor posts a listing</div>
+        <p class="step-desc">Wedding hall, canteen manager, or event organiser fills a quick form — food type, quantity, and pickup window.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <span class="step-emoji">🔔</span>
+        <div class="step-title">NGOs get alerted instantly</div>
+        <p class="step-desc">Nearby NGOs and SHGs see the listing appear in real time and receive an immediate notification.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <span class="step-emoji">✅</span>
+        <div class="step-title">NGO claims the food</div>
+        <p class="step-desc">One click to claim. The donor is notified with the NGO's contact details for pickup coordination.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">04</div>
+        <span class="step-emoji">🤝</span>
+        <div class="step-title">Food reaches people</div>
+        <p class="step-desc">The NGO picks up the food and serves it. Every meal is counted toward your impact dashboard.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHO IS THIS FOR -->
+  <div class="section" id="who">
+    <div class="who-section">
+      <div class="section-label" style="color: var(--green-light);">Two sides, one mission</div>
+      <div class="section-title" style="color: #fff;">Built for donors and receivers alike</div>
+      <div class="who-grid">
+        <div class="who-card">
+          <span class="who-icon">🏛️</span>
+          <div class="who-title">For Donors</div>
+          <p class="who-desc">Turn your event's surplus into social impact without any hassle. Post a listing in under 2 minutes.</p>
+          <ul class="who-list">
+            <li>Wedding halls & banquets</li>
+            <li>College & corporate canteens</li>
+            <li>Festival & cultural events</li>
+            <li>Restaurants with daily surplus</li>
+          </ul>
+        </div>
+        <div class="who-card">
+          <span class="who-icon">❤️</span>
+          <div class="who-title">For NGOs & SHGs</div>
+          <p class="who-desc">Get notified the moment food is available near you. No more cold-calling or last-minute scrambling.</p>
+          <ul class="who-list">
+            <li>NGOs serving daily meals</li>
+            <li>Self-help groups & anganwadis</li>
+            <li>Community kitchens</li>
+            <li>Old age homes & orphanages</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA STRIP -->
+  <div class="section">
+    <div class="cta-strip">
+      <div>
+        <h2>Ready to rescue your first meal?</h2>
+        <p>It takes less than 2 minutes to register and post your first listing.</p>
+      </div>
+      <div style="display:flex; gap: 1rem; flex-wrap: wrap;">
+        <a href="/signup?role=donor" class="btn btn-white btn-lg">Start donating</a>
+        <a href="/signup?role=ngo"   class="btn btn-lg" style="color:#fff; border-color: rgba(255,255,255,0.5);">Register NGO</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">Anna<span>Daan</span></div>
+    <div>Built for communities. Open source.</div>
+    <div>© 2026 AnnaDaan</div>
+  </footer>
+
+</body>
+</html>

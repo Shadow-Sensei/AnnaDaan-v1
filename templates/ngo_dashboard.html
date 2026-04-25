@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NGO Dashboard — AnnaDaan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    :root {
+      --green:       #1a4731;
+      --green-mid:   #2d6a4f;
+      --green-light: #52b788;
+      --green-pale:  #d8f3dc;
+      --amber:       #e76f51;
+      --amber-pale:  #fef3ee;
+      --cream:       #faf7f2;
+      --warm-white:  #fffdf9;
+      --gray-100:    #f3f4f6;
+      --gray-200:    #e5e7eb;
+      --gray-400:    #9ca3af;
+      --gray-600:    #6b7280;
+      --gray-900:    #111827;
+      --red:         #dc2626;
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body:    'DM Sans', system-ui, sans-serif;
+      --sidebar-w:    240px;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--cream);
+      color: var(--gray-900);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--green);
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; bottom: 0;
+      z-index: 50; overflow: hidden;
+    }
+    .sidebar::after {
+      content: '';
+      position: absolute; bottom: 0; right: 0;
+      width: 180px; height: 180px; border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+      transform: translate(40%, 40%); pointer-events: none;
+    }
+
+    .sidebar-logo {
+      padding: 1.5rem 1.25rem 1.25rem;
+      font-family: var(--font-display);
+      font-size: 1.3rem; font-weight: 900;
+      color: #fff; text-decoration: none;
+      display: block; flex-shrink: 0;
+    }
+    .sidebar-logo span { color: var(--amber); }
+
+    .sidebar-role {
+      margin: 0 1rem 1.25rem;
+      background: rgba(231,111,81,0.2);
+      border-radius: 8px; padding: 8px 12px;
+      font-size: 0.75rem; font-weight: 600;
+      color: rgba(255,200,180,0.9);
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+
+    .sidebar-nav { flex: 1; padding: 0 0.75rem; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 0.6rem 0.75rem; border-radius: 8px;
+      font-size: 0.875rem; font-weight: 500;
+      color: rgba(255,255,255,0.65);
+      cursor: pointer; transition: all 0.15s;
+      text-decoration: none; margin-bottom: 2px;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+    .nav-item.active { background: rgba(255,255,255,0.13); color: #fff; font-weight: 600; }
+    .nav-icon { font-size: 1rem; width: 20px; text-align: center; flex-shrink: 0; }
+
+    /* live indicator badge on nav */
+    .nav-badge {
+      margin-left: auto; background: var(--amber);
+      color: #fff; font-size: 0.65rem; font-weight: 700;
+      padding: 2px 7px; border-radius: 999px;
+    }
+
+    .sidebar-footer {
+      padding: 1rem 0.75rem 1.5rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      position: relative; z-index: 1;
+    }
+    .user-chip {
+      display: flex; align-items: center; gap: 10px;
+      padding: 0.5rem; border-radius: 8px; margin-bottom: 8px;
+    }
+    .user-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--green-light);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.85rem; color: #fff; flex-shrink: 0;
+    }
+    .user-info { overflow: hidden; }
+    .user-name  { font-size: 0.82rem; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-email { font-size: 0.7rem; color: rgba(255,255,255,0.45); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .logout-btn {
+      display: flex; align-items: center; gap: 8px;
+      padding: 0.5rem 0.75rem; border-radius: 8px;
+      font-size: 0.8rem; font-weight: 500;
+      color: rgba(255,255,255,0.5);
+      cursor: pointer; transition: all 0.15s; text-decoration: none;
+    }
+    .logout-btn:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.9); }
+
+    /* ── MAIN ── */
+    .main { margin-left: var(--sidebar-w); flex: 1; padding: 2rem 2.5rem; max-width: 1000px; }
+
+    .page-header { margin-bottom: 2rem; }
+    .greeting {
+      font-family: var(--font-display);
+      font-size: 1.7rem; font-weight: 900;
+      color: var(--green); margin-bottom: 0.2rem;
+    }
+    .greeting em { font-style: normal; color: var(--amber); }
+    .sub-greeting { font-size: 0.9rem; color: var(--gray-600); }
+
+    /* live dot */
+    .live-tag {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: var(--green-pale); color: var(--green-mid);
+      font-size: 0.75rem; font-weight: 600;
+      padding: 5px 12px; border-radius: 999px;
+      margin-bottom: 1.5rem;
+    }
+    .live-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--green-light);
+      animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.4); }
+    }
+
+    /* ── STAT CARDS ── */
+    .stat-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1rem; margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: var(--warm-white);
+      border-radius: 14px; padding: 1.25rem 1.5rem;
+      border: 1px solid var(--gray-200);
+    }
+    .stat-card-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--gray-400); margin-bottom: 0.5rem; }
+    .stat-card-num { font-family: var(--font-display); font-size: 2rem; font-weight: 900; color: var(--green); line-height: 1; margin-bottom: 0.2rem; }
+    .stat-card-detail { font-size: 0.78rem; color: var(--gray-600); }
+
+    /* ── FOOD LISTING CARDS ── */
+    .feed-grid { display: flex; flex-direction: column; gap: 12px; }
+
+    .food-card {
+      background: var(--warm-white);
+      border: 1px solid var(--gray-200);
+      border-radius: 14px; padding: 1.25rem;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .food-card:hover { border-color: var(--green-light); box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+
+    .food-card-top { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 1rem; }
+    .food-icon {
+      width: 46px; height: 46px; border-radius: 12px;
+      background: var(--amber-pale);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; flex-shrink: 0;
+    }
+    .food-info { flex: 1; }
+    .food-name { font-weight: 700; font-size: 1rem; color: var(--green); margin-bottom: 2px; }
+    .food-org  { font-size: 0.82rem; color: var(--gray-600); }
+
+    .food-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1rem; }
+    .pill {
+      font-size: 0.73rem; font-weight: 600;
+      padding: 4px 10px; border-radius: 999px;
+    }
+    .pill-green { background: var(--green-pale); color: var(--green-mid); }
+    .pill-amber { background: var(--amber-pale); color: #c05a3e; }
+    .pill-gray  { background: var(--gray-100); color: var(--gray-600); }
+
+    .food-card-footer {
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 12px;
+    }
+    .food-detail { font-size: 0.8rem; color: var(--gray-600); }
+    .food-detail strong { color: var(--gray-900); }
+
+    .btn-claim {
+      background: var(--amber); color: #fff;
+      border: none; padding: 0.55rem 1.25rem;
+      border-radius: 8px;
+      font-family: var(--font-body); font-size: 0.85rem; font-weight: 600;
+      cursor: pointer; transition: background 0.15s; flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .btn-claim:hover { background: #d4603f; }
+    .btn-claim:disabled { opacity: 0.6; cursor: not-allowed; background: var(--gray-400); }
+
+    .section-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .section-head h2 { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; color: var(--green); }
+
+    .empty-state { text-align: center; padding: 3rem 2rem; color: var(--gray-400); font-size: 0.9rem; }
+    .empty-emoji { font-size: 2.5rem; margin-bottom: 0.75rem; }
+
+    .card {
+      background: var(--warm-white); border-radius: 16px;
+      border: 1px solid var(--gray-200); padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .card-title { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; color: var(--green); margin-bottom: 0.3rem; }
+    .card-subtitle { font-size: 0.85rem; color: var(--gray-600); margin-bottom: 1.5rem; }
+
+    .alert {
+      padding: 0.75rem 1rem; border-radius: 8px;
+      font-size: 0.85rem; margin-bottom: 1rem; display: none;
+    }
+    .alert.show { display: block; }
+    .alert-success { background: var(--green-pale); color: var(--green); border: 1px solid var(--green-light); }
+    .alert-error   { background: #fef2f2; color: var(--red); border: 1px solid #fecaca; }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; padding: 1.25rem; }
+      .stat-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="{{ url_for('index') }}" class="sidebar-logo">Anna<span>Daan</span></a>
+    <div class="sidebar-role">❤️ NGO / SHG</div>
+    <nav class="sidebar-nav">
+      <a class="nav-item active" onclick="showSection('overview')">
+        <span class="nav-icon">📊</span> Overview
+      </a>
+      <a class="nav-item" onclick="showSection('feed')">
+        <span class="nav-icon">🔔</span> Live feed
+        <span class="nav-badge">LIVE</span>
+      </a>
+      <a class="nav-item" onclick="showSection('claimed')">
+        <span class="nav-icon">✅</span> Claimed food
+      </a>
+      <a class="nav-item" onclick="showSection('profile')">
+        <span class="nav-icon">⚙️</span> Profile
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="user-avatar">{{ user.contact_name[0].upper() if user.contact_name else user.email[0].upper() }}</div>
+        <div class="user-info">
+          <div class="user-name">{{ user.org_name or 'NGO' }}</div>
+          <div class="user-email">{{ user.email }}</div>
+        </div>
+      </div>
+      <a href="{{ url_for('logout') }}" class="logout-btn">
+        <span>↩</span> Log out
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- OVERVIEW -->
+    <section id="sec-overview">
+      <div class="page-header">
+        <div class="greeting">
+          Hello, <em>{{ user.org_name or user.contact_name or 'NGO' }}</em> 👋
+        </div>
+        <div class="sub-greeting">Check the live feed for food available near you.</div>
+      </div>
+
+      <div class="live-tag">
+        <span class="live-dot"></span>
+        Live feed is active — food listings update in real time
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-card-label">Food claimed</div>
+          <div class="stat-card-num">0</div>
+          <div class="stat-card-detail">Total listings accepted</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Meals received</div>
+          <div class="stat-card-num">0</div>
+          <div class="stat-card-detail">Estimated servings</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Donors connected</div>
+          <div class="stat-card-num">0</div>
+          <div class="stat-card-detail">Unique donors</div>
+        </div>
+      </div>
+
+      <div class="card" style="border-left: 4px solid var(--green-light);">
+        <div class="card-title">🔔 Check today's live listings</div>
+        <div class="card-subtitle">
+          Food posted by donors in {{ user.city or 'your city' }} is waiting to be claimed.
+        </div>
+        <button class="btn-claim" style="background:var(--green);" onclick="showSection('feed')">
+          View live feed →
+        </button>
+      </div>
+    </section>
+
+    <!-- LIVE FEED -->
+    <section id="sec-feed" style="display:none;">
+      <div class="page-header">
+        <div class="greeting">Live food feed</div>
+        <div class="sub-greeting">Listings available near {{ user.city or 'your city' }} right now.</div>
+      </div>
+
+      <div class="alert" id="feed-alert"></div>
+
+      <div class="section-head">
+        <div class="live-tag" style="margin:0;">
+          <span class="live-dot"></span> Showing available listings
+        </div>
+      </div>
+
+      <!-- Sample listing cards (replace with real DB query later) -->
+      <div class="feed-grid" id="feed-container">
+        <div class="empty-state">
+          <div class="empty-emoji">🍽️</div>
+          <div>No listings available right now — check back soon!</div>
+          <div style="font-size:0.8rem;margin-top:0.5rem;color:var(--gray-400);">
+            Donors in your city will appear here when they post surplus food.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CLAIMED FOOD -->
+    <section id="sec-claimed" style="display:none;">
+      <div class="page-header">
+        <div class="greeting">Claimed food</div>
+        <div class="sub-greeting">All listings you've accepted.</div>
+      </div>
+
+      <div id="claimed-container">
+        <div class="empty-state">
+          <div class="empty-emoji">✅</div>
+          <div>You haven't claimed any food yet.</div>
+          <div style="margin-top:0.75rem;">
+            <a href="#" onclick="showSection('feed')" style="color:var(--amber);font-weight:600;font-size:0.88rem;">
+              Go to live feed →
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROFILE -->
+    <section id="sec-profile" style="display:none;">
+      <div class="page-header">
+        <div class="greeting">Organisation profile</div>
+        <div class="sub-greeting">Your registered details on AnnaDaan.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Profile details</div>
+        <div class="card-subtitle">This information is shown to donors when you claim their food.</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div>
+            <div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--gray-400);margin-bottom:4px;">Organisation</div>
+            <div style="font-size:0.95rem;font-weight:600;">{{ user.org_name or '—' }}</div>
+          </div>
+          <div>
+            <div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--gray-400);margin-bottom:4px;">Contact person</div>
+            <div style="font-size:0.95rem;font-weight:600;">{{ user.contact_name or '—' }}</div>
+          </div>
+          <div>
+            <div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--gray-400);margin-bottom:4px;">Email</div>
+            <div style="font-size:0.95rem;">{{ user.email }}</div>
+          </div>
+          <div>
+            <div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--gray-400);margin-bottom:4px;">Phone</div>
+            <div style="font-size:0.95rem;">{{ user.phone or '—' }}</div>
+          </div>
+          <div>
+            <div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--gray-400);margin-bottom:4px;">City</div>
+            <div style="font-size:0.95rem;">{{ user.city or '—' }}{% if user.state %}, {{ user.state }}{% endif %}</div>
+          </div>
+          <div>
+            <div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--gray-400);margin-bottom:4px;">Daily capacity</div>
+            <div style="font-size:0.95rem;">{{ user.capacity or '—' }} servings</div>
+          </div>
+          {% if user.area_served %}
+          <div style="grid-column:1/-1;">
+            <div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--gray-400);margin-bottom:4px;">Areas served</div>
+            <div style="font-size:0.95rem;">{{ user.area_served }}</div>
+          </div>
+          {% endif %}
+          {% if user.ngo_reg_number %}
+          <div style="grid-column:1/-1;">
+            <div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--gray-400);margin-bottom:4px;">NGO reg. number</div>
+            <div style="font-size:0.95rem;">{{ user.ngo_reg_number }}</div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    function showSection(name) {
+      ['overview','feed','claimed','profile'].forEach(s => {
+        document.getElementById('sec-' + s).style.display = s === name ? 'block' : 'none'
+      })
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'))
+      const map = { overview: 0, feed: 1, claimed: 2, profile: 3 }
+      document.querySelectorAll('.nav-item')[map[name]].classList.add('active')
+    }
+  </script>
+
+</body>
+</html>
