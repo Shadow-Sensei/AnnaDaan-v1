@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sign Up — AnnaDaan</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍽️</text></svg>" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -282,7 +283,7 @@
 
   <!-- LEFT PANEL -->
   <div class="left-panel">
-    <a href="/index.html" class="logo">Anna<span>Daan</span></a>
+    <a href="{{ url_for('index') }}" class="logo">Anna<span>Daan</span></a>
 
     <div class="left-content">
       <h2 class="left-headline">Every plate<br>counts. Every<br><em>meal matters.</em></h2>
@@ -323,7 +324,7 @@
 
       <div class="form-header">
         <h1>Create your account</h1>
-        <p>Already registered? <a href="login.html">Log in here</a></p>
+        <p>Already registered? <a href="{{ url_for('login') }}">Log in here</a></p>
       </div>
 
       <!-- Progress -->
@@ -337,7 +338,7 @@
       <!-- Alert -->
       <div class="alert alert-error" id="alert"></div>
 
-      <form id="signup-form" novalidate>
+      <form id="signup-form" method="POST" action="{{ url_for('signup') }}" novalidate>
 
         <!-- STEP 1: Role selection -->
         <div id="step1">
@@ -429,27 +430,18 @@
               <input type="tel" id="phone" placeholder="+91 98765 43210" />
             </div>
             <div class="field">
-              <label for="city">City <span class="req">*</span></label>
-              <select id="city">
-                <option value="">Select city</option>
-                <option>Bengaluru</option>
-                <option>Mumbai</option>
-                <option>Delhi</option>
-                <option>Chennai</option>
-                <option>Hyderabad</option>
-                <option>Pune</option>
-                <option>Kolkata</option>
-                <option>Ahmedabad</option>
-                <option>Jaipur</option>
-                <option>Other</option>
-              </select>
-              <span class="field-error" id="city-err">Please select a city</span>
+              <label for="city-display">City <span class="req">*</span></label>
+              <input type="text" id="city-display" placeholder="e.g. Bengaluru" />
+              <span class="field-error" id="city-err">Please enter your city</span>
             </div>
           </div>
 
           <div class="field">
-            <label for="address">Address / Area</label>
-            <input type="text" id="address" placeholder="Street, locality, landmark" />
+            <label for="address">Address / Area <span style="font-size:0.7rem;color:var(--gray-400);font-weight:400;">(picks coordinates automatically)</span></label>
+            <input type="text" id="address" placeholder="Start typing your address…" autocomplete="off" />
+            <div id="address-hint" style="font-size:0.72rem;color:var(--green-mid);margin-top:4px;display:none;">
+              📍 Location captured — distance sorting will work for you!
+            </div>
           </div>
 
           <!-- NGO-only fields -->
@@ -511,10 +503,13 @@
         <input type="hidden" id="h-contact-name" name="contact_name" />
         <input type="hidden" id="h-phone"        name="phone" />
         <input type="hidden" id="h-city"         name="city" />
+        <input type="hidden" id="h-state"        name="state" />
         <input type="hidden" id="h-ngo-reg"      name="ngo_reg_number" />
         <input type="hidden" id="h-capacity"     name="capacity" />
         <input type="hidden" id="h-area-served"  name="area_served" />
         <input type="hidden" id="h-venue-type"   name="venue_type" />
+        <input type="hidden" id="h-lat"          name="lat" />
+        <input type="hidden" id="h-lng"          name="lng" />
       </form>
     </div>
   </div>
@@ -618,22 +613,6 @@
       return ok
     }
 
-    function validateStep3() {
-      const org     = document.getElementById('org-name').value.trim()
-      const contact = document.getElementById('contact-name').value.trim()
-      const city    = document.getElementById('city').value
-      const terms   = document.getElementById('terms').checked
-      let ok = true
-      ok = showErr('org-name', 'org-err', !org) && ok
-      ok = showErr('contact-name', 'contact-err', !contact) && ok
-      ok = showErr('city', 'city-err', !city) && ok
-      if (!terms) {
-        showAlert('Please accept the terms and conditions to continue.', 'error')
-        ok = false
-      }
-      return ok
-    }
-
     function showAlert(msg, type) {
       const el = document.getElementById('alert')
       el.textContent = msg
@@ -657,15 +636,16 @@
       document.getElementById('h-org-name').value     = document.getElementById('org-name').value.trim()
       document.getElementById('h-contact-name').value = document.getElementById('contact-name').value.trim()
       document.getElementById('h-phone').value        = document.getElementById('phone').value.trim()
-      document.getElementById('h-city').value         = document.getElementById('city').value
+      document.getElementById('h-city').value         = document.getElementById('city-display').value.trim()
+      document.getElementById('h-state').value        = ''
       document.getElementById('h-ngo-reg').value      = currentRole === 'ngo' ? document.getElementById('reg-no').value.trim() : ''
       document.getElementById('h-capacity').value     = currentRole === 'ngo' ? document.getElementById('capacity').value : ''
       document.getElementById('h-area-served').value  = currentRole === 'ngo' ? document.getElementById('area-served').value.trim() : ''
       document.getElementById('h-venue-type').value   = currentRole === 'donor' ? document.getElementById('venue-type').value : ''
+      document.getElementById('h-lat').value          = _placesLat !== null ? _placesLat : ''
+      document.getElementById('h-lng').value          = _placesLng !== null ? _placesLng : ''
 
       // Real form POST — Flask sets the session cookie + redirects in one go
-      document.getElementById('signup-form').setAttribute('method', 'POST')
-      document.getElementById('signup-form').setAttribute('action', '/signup')
       document.getElementById('signup-form').submit()
     })
 
@@ -674,10 +654,74 @@
       showAlert('Google sign-in coming soon.', 'error')
     })
 
+    // ── Google Places Autocomplete ──────────────────────
+    // Loaded lazily — will init when Google Maps script resolves
+    let _placesLat = null, _placesLng = null, _placesCity = ''
+
+    function initPlaces() {
+      const input = document.getElementById('address')
+      if (!input || typeof google === 'undefined') return
+      const autocomplete = new google.maps.places.Autocomplete(input, {
+        types: ['geocode'],
+        componentRestrictions: { country: 'in' },
+        fields: ['geometry', 'address_components', 'formatted_address'],
+      })
+      autocomplete.addListener('place_changed', () => {
+        const place = autocomplete.getPlace()
+        if (!place.geometry) return
+        _placesLat = place.geometry.location.lat()
+        _placesLng = place.geometry.location.lng()
+
+        // Extract city from address components
+        const cityComp = place.address_components.find(c =>
+          c.types.includes('locality') || c.types.includes('administrative_area_level_2')
+        )
+        _placesCity = cityComp ? cityComp.long_name : ''
+        if (_placesCity && !document.getElementById('city-display').value) {
+          document.getElementById('city-display').value = _placesCity
+        }
+        document.getElementById('address-hint').style.display = 'block'
+      })
+    }
+
+    // Inject Places script with a saved key (reuse ngo dashboard key if available)
+    function _loadPlacesScript(key) {
+      if (document.getElementById('places-script')) return
+      const s = document.createElement('script')
+      s.id  = 'places-script'
+      s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places&callback=initPlaces`
+      s.async = true
+      document.head.appendChild(s)
+    }
+    window.initPlaces = initPlaces
+
+    // Try to load using saved key from NGO dashboard session
+    _loadPlacesScript("{{ maps_key }}")
+
+    // Expose so user can trigger manually if needed
+    window._loadPlacesScript = _loadPlacesScript
+
     // ── Read role from URL param (?role=ngo) ───────────
     const urlRole = new URLSearchParams(window.location.search).get('role')
     if (urlRole === 'ngo') {
       document.getElementById('role-ngo').click()
+    }
+
+    // ── Update city validation to use city-display ─────
+    function validateStep3() {
+      const org     = document.getElementById('org-name').value.trim()
+      const contact = document.getElementById('contact-name').value.trim()
+      const city    = document.getElementById('city-display').value.trim()
+      const terms   = document.getElementById('terms').checked
+      let ok = true
+      ok = showErr('org-name', 'org-err', !org) && ok
+      ok = showErr('contact-name', 'contact-err', !contact) && ok
+      ok = showErr('city-display', 'city-err', !city) && ok
+      if (!terms) {
+        showAlert('Please accept the terms and conditions to continue.', 'error')
+        ok = false
+      }
+      return ok
     }
   </script>
 

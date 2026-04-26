@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, j
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
-import os
+import os, math
 
 app = Flask(__name__, template_folder='templates')
 app.secret_key = os.environ.get('SECRET_KEY', 'change-this-in-production')
@@ -13,6 +13,7 @@ app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SECURE']   = False          # set True when serving over HTTPS
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
+app.config['GOOGLE_MAPS_KEY'] = 'AIzaSyCe3iJpvCdND7hQ949oCwqLadTO5ynzaG4'
 
 db = SQLAlchemy(app)
 
@@ -32,6 +33,8 @@ class User(db.Model):
     ngo_reg_number = db.Column(db.String(60))
     capacity       = db.Column(db.Integer)
     area_served    = db.Column(db.String(200))
+    lat            = db.Column(db.Float, nullable=True)
+    lng            = db.Column(db.Float, nullable=True)
     listings       = db.relationship('Listing', backref='donor', lazy=True, foreign_keys='Listing.donor_id')
 
     def set_password(self, pw):   self.password_hash = generate_password_hash(pw)
@@ -51,6 +54,8 @@ class User(db.Model):
             'ngo_reg_number': self.ngo_reg_number  or '',
             'capacity':       self.capacity        or '',
             'area_served':    self.area_served     or '',
+            'lat':            self.lat,
+            'lng':            self.lng,
         }
 
 
@@ -68,12 +73,17 @@ class Listing(db.Model):
     claimed_by   = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     claimed_at   = db.Column(db.DateTime, nullable=True)
     created_at   = db.Column(db.DateTime, default=datetime.utcnow)
+    lat          = db.Column(db.Float, nullable=True)
+    lng          = db.Column(db.Float, nullable=True)
 
     claimer      = db.relationship('User', foreign_keys=[claimed_by], backref='claims')
 
-    def to_dict(self, current_user_id=None):
+    def to_dict(self, current_user_id=None, ngo_lat=None, ngo_lng=None):
         donor = User.query.get(self.donor_id)
         claimer = User.query.get(self.claimed_by) if self.claimed_by else None
+        distance_km = None
+        if ngo_lat and ngo_lng and self.lat and self.lng:
+            distance_km = _haversine(ngo_lat, ngo_lng, self.lat, self.lng)
         return {
             'id':          self.id,
             'food_name':   self.food_name,
@@ -90,11 +100,25 @@ class Listing(db.Model):
             'claimed_by_name': claimer.org_name or claimer.contact_name if claimer else None,
             'claimed_by_phone': claimer.phone if claimer else None,
             'is_mine':     (self.donor_id == current_user_id),
+            'lat':         self.lat,
+            'lng':         self.lng,
+            'distance_km': round(distance_km, 1) if distance_km is not None else None,
         }
 
 
 with app.app_context():
     db.create_all()
+
+
+# ── Geo helpers ────────────────────────────────────────────────────────────────
+
+def _haversine(lat1, lon1, lat2, lon2):
+    """Return distance in km between two lat/lng points."""
+    R = 6371
+    dlat = math.radians(lat2 - lat1)
+    dlon = math.radians(lon2 - lon1)
+    a = math.sin(dlat/2)**2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon/2)**2
+    return R * 2 * math.asin(math.sqrt(a))
 
 
 # ── Session helper ─────────────────────────────────────────────────────────────
@@ -125,6 +149,11 @@ def login_required(role=None):
 
 # ── Page Routes ────────────────────────────────────────────────────────────────
 
+@app.route('/favicon.ico')
+def favicon():
+    return '', 204
+
+
 @app.route('/')
 def index():
     stats = {
@@ -138,6 +167,7 @@ def index():
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
+        print("=== SIGNUP POST ===", dict(request.form))
         data  = request.form
         email = data.get('email', '').strip().lower()
         pw    = data.get('password', '')
@@ -162,6 +192,8 @@ def signup():
             ngo_reg_number = data.get('ngo_reg_number', '').strip() if role == 'ngo' else None,
             capacity       = int(data.get('capacity')) if role == 'ngo' and data.get('capacity') else None,
             area_served    = data.get('area_served', '').strip() if role == 'ngo' else None,
+            lat            = float(data.get('lat')) if data.get('lat') else None,
+            lng            = float(data.get('lng')) if data.get('lng') else None,
         )
         user.set_password(pw)
         db.session.add(user)
@@ -170,7 +202,7 @@ def signup():
         _create_session(user)
         return redirect(url_for('dashboard'))
 
-    return render_template('signup.html')
+    return render_template('signup.html', maps_key=app.config['GOOGLE_MAPS_KEY'])
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -245,6 +277,21 @@ def update_profile():
     return jsonify({'success': True, 'user': user.to_profile_dict()})
 
 
+@app.route('/api/profile/location', methods=['PATCH'])
+def update_location():
+    user, err = login_required()
+    if err: return jsonify({'error': 'Unauthorized'}), 401
+    data = request.get_json()
+    try:
+        user.lat  = float(data.get('lat'))
+        user.lng  = float(data.get('lng'))
+        user.city = data.get('city', user.city or '').strip()
+        db.session.commit()
+        return jsonify({'success': True, 'lat': user.lat, 'lng': user.lng})
+    except (TypeError, ValueError):
+        return jsonify({'error': 'Invalid coordinates'}), 400
+
+
 @app.route('/api/profile/password', methods=['POST'])
 def change_password():
     user, err = login_required()
@@ -301,6 +348,8 @@ def post_listing():
         contact   = data.get('contact', user.phone or ''),
         notes     = data.get('notes', ''),
         city      = user.city or '',
+        lat       = user.lat,
+        lng       = user.lng,
     )
     db.session.add(listing)
     db.session.commit()
@@ -337,13 +386,26 @@ def ngo_feed():
     user, err = login_required(role='ngo')
     if err: return jsonify({'error': 'Unauthorized'}), 401
 
-    # show available listings in same city first, then all others
-    listings = Listing.query.filter_by(status='available')\
-                 .order_by(
-                     (Listing.city == user.city).desc(),
-                     Listing.created_at.desc()
-                 ).limit(30).all()
-    return jsonify({'listings': [l.to_dict(user.id) for l in listings]})
+    listings = Listing.query.filter_by(status='available').limit(50).all()
+
+    ngo_lat, ngo_lng = user.lat, user.lng
+
+    if ngo_lat and ngo_lng:
+        # Sort by distance ascending; listings without coords go to end
+        def sort_key(l):
+            if l.lat and l.lng:
+                return _haversine(ngo_lat, ngo_lng, l.lat, l.lng)
+            return 9999
+        listings.sort(key=sort_key)
+    else:
+        # Fallback: same city first
+        listings.sort(key=lambda l: (0 if l.city == user.city else 1))
+
+    return jsonify({
+        'listings': [l.to_dict(user.id, ngo_lat, ngo_lng) for l in listings],
+        'ngo_lat': ngo_lat,
+        'ngo_lng': ngo_lng,
+    })
 
 
 @app.route('/api/listings/<int:listing_id>/claim', methods=['POST'])
