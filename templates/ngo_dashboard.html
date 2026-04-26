@@ -263,8 +263,8 @@
       <a class="nav-item" onclick="showSection('claimed')">
         <span class="nav-icon">✅</span> Claimed food
       </a>
-      <a class="nav-item" onclick="showSection('profile')">
-        <span class="nav-icon">⚙️</span> Profile
+      <a class="nav-item" href="{{ url_for('profile') }}">
+        <span class="nav-icon">👤</span> My profile
       </a>
     </nav>
     <div class="sidebar-footer">
@@ -374,55 +374,23 @@
       </div>
     </section>
 
-    <!-- PROFILE -->
+    <!-- PROFILE — redirects to full profile page -->
     <section id="sec-profile" style="display:none;">
       <div class="page-header">
         <div class="greeting">Organisation profile</div>
-        <div class="sub-greeting">Your registered details on AnnaDaan.</div>
+        <div class="sub-greeting">Manage your account details and preferences.</div>
       </div>
-
-      <div class="card">
-        <div class="card-title">Profile details</div>
-        <div class="card-subtitle">This information is shown to donors when you claim their food.</div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-          <div>
-            <div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--gray-400);margin-bottom:4px;">Organisation</div>
-            <div style="font-size:0.95rem;font-weight:600;">{{ user.org_name or '—' }}</div>
-          </div>
-          <div>
-            <div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--gray-400);margin-bottom:4px;">Contact person</div>
-            <div style="font-size:0.95rem;font-weight:600;">{{ user.contact_name or '—' }}</div>
-          </div>
-          <div>
-            <div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--gray-400);margin-bottom:4px;">Email</div>
-            <div style="font-size:0.95rem;">{{ user.email }}</div>
-          </div>
-          <div>
-            <div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--gray-400);margin-bottom:4px;">Phone</div>
-            <div style="font-size:0.95rem;">{{ user.phone or '—' }}</div>
-          </div>
-          <div>
-            <div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--gray-400);margin-bottom:4px;">City</div>
-            <div style="font-size:0.95rem;">{{ user.city or '—' }}{% if user.state %}, {{ user.state }}{% endif %}</div>
-          </div>
-          <div>
-            <div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--gray-400);margin-bottom:4px;">Daily capacity</div>
-            <div style="font-size:0.95rem;">{{ user.capacity or '—' }} servings</div>
-          </div>
-          {% if user.area_served %}
-          <div style="grid-column:1/-1;">
-            <div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--gray-400);margin-bottom:4px;">Areas served</div>
-            <div style="font-size:0.95rem;">{{ user.area_served }}</div>
-          </div>
-          {% endif %}
-          {% if user.ngo_reg_number %}
-          <div style="grid-column:1/-1;">
-            <div style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--gray-400);margin-bottom:4px;">NGO reg. number</div>
-            <div style="font-size:0.95rem;">{{ user.ngo_reg_number }}</div>
-          </div>
-          {% endif %}
+      <div class="card" style="border-left: 4px solid var(--green-light); text-align:center; padding: 3rem 2rem;">
+        <div style="font-size:3rem; margin-bottom:1rem;">👤</div>
+        <div style="font-family:var(--font-display);font-size:1.3rem;font-weight:700;color:var(--green);margin-bottom:0.5rem;">
+          Your full profile page
         </div>
+        <div style="color:var(--gray-600);font-size:0.9rem;max-width:340px;margin:0 auto 1.5rem;">
+          Edit your organisation details, change your password, and manage your session — all in one place.
+        </div>
+        <a href="{{ url_for('profile') }}" style="display:inline-block;background:var(--green);color:#fff;padding:0.75rem 2rem;border-radius:10px;font-weight:600;font-size:0.9rem;text-decoration:none;">
+          Go to profile →
+        </a>
       </div>
     </section>
 
@@ -436,7 +404,111 @@
       document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'))
       const map = { overview: 0, feed: 1, claimed: 2, profile: 3 }
       document.querySelectorAll('.nav-item')[map[name]].classList.add('active')
+      if (name === 'feed') loadFeed()
+      if (name === 'claimed') loadClaimed()
+      if (name === 'overview') loadStats()
     }
+
+    // ── Load NGO stats ───────────────────────────────────
+    async function loadStats() {
+      const res = await fetch('/api/listings/ngo-stats')
+      const data = await res.json()
+      document.querySelectorAll('.stat-card-num')[0].textContent = data.claimed || 0
+      document.querySelectorAll('.stat-card-num')[1].textContent = data.meals   || 0
+      document.querySelectorAll('.stat-card-num')[2].textContent = data.donors  || 0
+    }
+
+    // ── Render a listing card ─────────────────────────────
+    function listingCard(l, showClaim=true) {
+      const urgency = l.pickup_by ? `<span class="pill pill-amber">⏰ Pickup by ${l.pickup_by.replace('T',' ')}</span>` : ''
+      const cityPill = l.city ? `<span class="pill pill-gray">📍 ${l.city}</span>` : ''
+      const claimBtn = showClaim
+        ? `<button class="btn-claim" onclick="claimListing(${l.id}, this)">Claim this food →</button>`
+        : `<div style="font-size:0.82rem;color:var(--green);font-weight:600;">✅ You claimed this</div>`
+      return `
+        <div class="food-card" id="card-${l.id}">
+          <div class="food-card-top">
+            <div class="food-icon">🍽️</div>
+            <div class="food-info">
+              <div class="food-name">${l.food_name}</div>
+              <div class="food-org">${l.donor_name}</div>
+            </div>
+            <div style="font-family:var(--font-display);font-size:1.5rem;font-weight:900;color:var(--green);">${l.quantity}</div>
+          </div>
+          <div class="food-pills">
+            <span class="pill pill-green">${l.food_type}</span>
+            ${urgency}
+            ${cityPill}
+          </div>
+          ${l.notes ? `<div style="font-size:0.82rem;color:var(--gray-600);margin-bottom:0.75rem;">📝 ${l.notes}</div>` : ''}
+          <div class="food-card-footer" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+            <div style="font-size:0.8rem;color:var(--gray-400);">Posted ${l.created_at}</div>
+            ${claimBtn}
+          </div>
+          ${showClaim && l.donor_phone ? `<div style="font-size:0.78rem;color:var(--gray-400);margin-top:0.4rem;">📞 Donor contact: ${l.donor_phone}</div>` : ''}
+        </div>`
+    }
+
+    // ── Live feed ────────────────────────────────────────
+    async function loadFeed() {
+      const container = document.getElementById('feed-container')
+      container.innerHTML = '<div style="color:var(--gray-400);font-size:0.9rem;padding:1rem 0;">Loading live feed…</div>'
+      const res  = await fetch('/api/feed')
+      const data = await res.json()
+      if (!data.listings || data.listings.length === 0) {
+        container.innerHTML = `<div class="empty-state">
+          <div class="empty-emoji">🍽️</div>
+          <div>No listings available right now — check back soon!</div>
+          <div style="font-size:0.8rem;margin-top:0.5rem;color:var(--gray-400);">Donors in your city will appear here when they post surplus food.</div>
+        </div>`
+        return
+      }
+      // Update badge
+      document.querySelector('.nav-badge').textContent = data.listings.length
+      container.innerHTML = data.listings.map(l => listingCard(l, true)).join('')
+    }
+
+    // ── Claim a listing ──────────────────────────────────
+    async function claimListing(id, btn) {
+      btn.disabled = true
+      btn.textContent = 'Claiming…'
+      const res  = await fetch(`/api/listings/${id}/claim`, { method: 'POST' })
+      const data = await res.json()
+      if (res.ok) {
+        const card = document.getElementById('card-' + id)
+        card.style.borderColor = 'var(--green-light)'
+        card.querySelector('.food-card-footer').innerHTML = `
+          <div style="width:100%;">
+            <div style="font-size:0.9rem;font-weight:600;color:var(--green);margin-bottom:4px;">✅ Claimed! Contact the donor to arrange pickup.</div>
+            <div style="font-size:0.82rem;color:var(--gray-600);">📞 ${data.listing.donor_phone || 'See donor contact above'}</div>
+          </div>`
+        loadStats()
+      } else {
+        btn.disabled = false
+        btn.textContent = 'Claim this food →'
+        alert(data.error || 'Could not claim. Try again.')
+      }
+    }
+
+    // ── Claimed history ───────────────────────────────────
+    async function loadClaimed() {
+      const container = document.getElementById('claimed-container')
+      container.innerHTML = '<div style="color:var(--gray-400);font-size:0.9rem;padding:1rem 0;">Loading…</div>'
+      const res  = await fetch('/api/listings/claimed')
+      const data = await res.json()
+      if (!data.listings || data.listings.length === 0) {
+        container.innerHTML = `<div class="empty-state">
+          <div class="empty-emoji">✅</div>
+          <div>You haven't claimed any food yet.</div>
+          <div style="margin-top:0.75rem;"><a href="#" onclick="showSection('feed')" style="color:var(--amber);font-weight:600;font-size:0.88rem;">Go to live feed →</a></div>
+        </div>`
+        return
+      }
+      container.innerHTML = '<div class="feed-grid">' + data.listings.map(l => listingCard(l, false)).join('') + '</div>'
+    }
+
+    // Boot
+    loadStats()
   </script>
 
 </body>

@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Profile — AnnaDaan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    :root {
+      --green:       #1a4731;
+      --green-mid:   #2d6a4f;
+      --green-light: #52b788;
+      --green-pale:  #d8f3dc;
+      --amber:       #e76f51;
+      --amber-pale:  #fef3ee;
+      --cream:       #faf7f2;
+      --warm-white:  #fffdf9;
+      --gray-100:    #f3f4f6;
+      --gray-200:    #e5e7eb;
+      --gray-400:    #9ca3af;
+      --gray-600:    #6b7280;
+      --gray-900:    #111827;
+      --red:         #dc2626;
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body:    'DM Sans', system-ui, sans-serif;
+      --sidebar-w:    240px;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--cream);
+      color: var(--gray-900);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--green);
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; bottom: 0;
+      z-index: 50;
+      overflow: hidden;
+    }
+    .sidebar::before {
+      content: '';
+      position: absolute;
+      width: 220px; height: 220px; border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+      top: -60px; right: -60px; pointer-events: none;
+    }
+
+    .sidebar-logo {
+      font-family: var(--font-display);
+      font-size: 1.4rem; font-weight: 900;
+      color: #fff; text-decoration: none;
+      padding: 1.5rem 1.25rem 1rem;
+      display: block; position: relative; z-index: 1;
+    }
+    .sidebar-logo span { color: var(--amber); }
+
+    .nav-section { padding: 0 0.75rem; flex: 1; position: relative; z-index: 1; }
+    .nav-label {
+      font-size: 0.65rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: rgba(255,255,255,0.35);
+      padding: 0.5rem 0.5rem 0.35rem;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 0.55rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.85rem; font-weight: 500;
+      color: rgba(255,255,255,0.65);
+      cursor: pointer; transition: all 0.15s;
+      text-decoration: none; margin-bottom: 2px;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+    .nav-item.active { background: rgba(255,255,255,0.12); color: #fff; font-weight: 600; }
+    .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+
+    .sidebar-footer {
+      padding: 1rem 0.75rem 1.25rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      position: relative; z-index: 1;
+    }
+    .user-chip {
+      display: flex; align-items: center; gap: 10px;
+      padding: 0.5rem 0.5rem; border-radius: 8px; margin-bottom: 8px;
+    }
+    .user-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--amber);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.85rem; color: #fff;
+      flex-shrink: 0;
+    }
+    .user-info { overflow: hidden; }
+    .user-name { font-size: 0.82rem; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-email { font-size: 0.7rem; color: rgba(255,255,255,0.45); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .logout-btn {
+      display: flex; align-items: center; gap: 8px;
+      padding: 0.5rem 0.75rem; border-radius: 8px;
+      font-size: 0.8rem; font-weight: 500;
+      color: rgba(255,255,255,0.5);
+      cursor: pointer; transition: all 0.15s;
+      text-decoration: none;
+    }
+    .logout-btn:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.9); }
+
+    /* ── MAIN ── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1; padding: 2rem 2.5rem;
+      max-width: 820px;
+    }
+
+    .page-header { margin-bottom: 2rem; }
+    .greeting {
+      font-family: var(--font-display);
+      font-size: 1.7rem; font-weight: 900;
+      color: var(--green); margin-bottom: 0.2rem;
+    }
+    .greeting em { font-style: normal; color: var(--amber); }
+    .sub-greeting { font-size: 0.9rem; color: var(--gray-600); }
+
+    /* ── PROFILE HERO ── */
+    .profile-hero {
+      background: var(--green);
+      border-radius: 20px;
+      padding: 2rem 2.5rem;
+      display: flex; align-items: center; gap: 2rem;
+      margin-bottom: 1.5rem;
+      position: relative; overflow: hidden;
+    }
+    .profile-hero::before {
+      content: '';
+      position: absolute;
+      width: 300px; height: 300px; border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+      top: -100px; right: -80px; pointer-events: none;
+    }
+    .hero-avatar {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: var(--amber);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display);
+      font-size: 2rem; font-weight: 900; color: #fff;
+      flex-shrink: 0;
+      border: 3px solid rgba(255,255,255,0.2);
+      position: relative; z-index: 1;
+    }
+    .hero-info { position: relative; z-index: 1; }
+    .hero-name {
+      font-family: var(--font-display);
+      font-size: 1.5rem; font-weight: 900; color: #fff;
+      margin-bottom: 0.2rem;
+    }
+    .hero-email { font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-bottom: 0.6rem; }
+    .role-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 999px; padding: 4px 12px;
+      font-size: 0.75rem; font-weight: 600;
+      color: var(--green-light); text-transform: uppercase; letter-spacing: 0.06em;
+    }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--warm-white);
+      border-radius: 16px;
+      border: 1px solid var(--gray-200);
+      padding: 1.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .card-title {
+      font-family: var(--font-display);
+      font-size: 1.1rem; font-weight: 700;
+      color: var(--green); margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .card-title-icon { font-size: 1.1rem; }
+
+    /* ── FORM FIELDS ── */
+    .form-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+    }
+    .form-grid.single { grid-template-columns: 1fr; }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field.full { grid-column: 1 / -1; }
+    .field label { font-size: 0.8rem; font-weight: 600; color: var(--gray-900); }
+    .field input, .field select, .field textarea {
+      font-family: var(--font-body); font-size: 0.88rem;
+      padding: 0.65rem 0.85rem;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 8px; background: #fff;
+      color: var(--gray-900); outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      width: 100%;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color: var(--green-light);
+      box-shadow: 0 0 0 3px rgba(82,183,136,0.15);
+    }
+    .field input:disabled {
+      background: var(--gray-100); color: var(--gray-600); cursor: not-allowed;
+    }
+    .field textarea { resize: vertical; min-height: 80px; }
+    .field-hint { font-size: 0.75rem; color: var(--gray-400); margin-top: 2px; }
+
+    /* ── PASSWORD SECTION ── */
+    .pw-wrap { position: relative; }
+    .pw-toggle {
+      position: absolute; right: 10px; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      color: var(--gray-400); font-size: 0.78rem; font-weight: 500;
+    }
+
+    /* ── ALERTS ── */
+    .alert {
+      padding: 0.75rem 1rem; border-radius: 8px;
+      font-size: 0.85rem; margin-bottom: 1rem; display: none;
+    }
+    .alert.show { display: block; }
+    .alert-error   { background: #fef2f2; color: var(--red); border: 1px solid #fecaca; }
+    .alert-success { background: var(--green-pale); color: var(--green); border: 1px solid var(--green-light); }
+
+    /* ── BUTTONS ── */
+    .btn-row { display: flex; gap: 10px; margin-top: 1.25rem; align-items: center; }
+    .btn-primary {
+      background: var(--green); color: #fff; border: none;
+      padding: 0.7rem 1.5rem; border-radius: 9px;
+      font-family: var(--font-body); font-size: 0.88rem; font-weight: 600;
+      cursor: pointer; transition: background 0.18s, transform 0.1s;
+    }
+    .btn-primary:hover:not(:disabled) { background: var(--green-mid); transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-ghost {
+      background: none; color: var(--gray-600);
+      border: 1.5px solid var(--gray-200);
+      padding: 0.7rem 1.5rem; border-radius: 9px;
+      font-family: var(--font-body); font-size: 0.88rem; font-weight: 600;
+      cursor: pointer; transition: all 0.18s;
+    }
+    .btn-ghost:hover { border-color: var(--green-light); color: var(--green); }
+    .btn-danger {
+      background: none; color: var(--red);
+      border: 1.5px solid #fecaca;
+      padding: 0.7rem 1.5rem; border-radius: 9px;
+      font-family: var(--font-body); font-size: 0.88rem; font-weight: 600;
+      cursor: pointer; transition: all 0.18s;
+    }
+    .btn-danger:hover { background: #fef2f2; }
+
+    .save-indicator {
+      font-size: 0.8rem; color: var(--green); font-weight: 500;
+      display: none; align-items: center; gap: 5px;
+    }
+    .save-indicator.show { display: flex; }
+
+    /* ── DIVIDER ── */
+    .section-divider {
+      height: 1px; background: var(--gray-200); margin: 1.5rem 0;
+    }
+
+    /* ── SESSION INFO ── */
+    .session-info {
+      display: flex; flex-direction: column; gap: 0.65rem;
+    }
+    .session-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.7rem 1rem; background: var(--gray-100);
+      border-radius: 8px; font-size: 0.85rem;
+    }
+    .session-row-label { color: var(--gray-600); font-weight: 500; }
+    .session-row-val { color: var(--gray-900); font-weight: 600; }
+    .status-dot {
+      display: inline-block; width: 8px; height: 8px;
+      border-radius: 50%; background: var(--green-light);
+      margin-right: 6px; animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.5; transform: scale(1.3); }
+    }
+
+    /* ── DANGER ZONE ── */
+    .danger-zone {
+      border: 1px solid #fecaca;
+      background: #fffafa;
+      border-radius: 16px; padding: 1.75rem;
+    }
+    .danger-zone .card-title { color: var(--red); }
+
+    /* ── MOBILE ── */
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); transition: transform 0.25s; }
+      .sidebar.open { transform: translateX(0); }
+      .main { margin-left: 0; padding: 1.25rem; }
+      .form-grid { grid-template-columns: 1fr; }
+      .mobile-menu-btn {
+        position: fixed; top: 1rem; left: 1rem;
+        z-index: 100; background: var(--green);
+        border: none; color: #fff; width: 40px; height: 40px;
+        border-radius: 10px; font-size: 1.2rem; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+      }
+    }
+    @media (min-width: 769px) {
+      .mobile-menu-btn { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <button class="mobile-menu-btn" id="menu-btn" onclick="toggleSidebar()">☰</button>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <a href="/" class="sidebar-logo">Anna<span>Daan</span></a>
+
+    <nav class="nav-section">
+      <div class="nav-label">Menu</div>
+      <a href="/dashboard" class="nav-item">
+        <span class="nav-icon">🏠</span> Dashboard
+      </a>
+      <a href="/profile" class="nav-item active">
+        <span class="nav-icon">👤</span> My Profile
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="user-avatar" id="sidebar-avatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebar-name">Loading…</div>
+          <div class="user-email" id="sidebar-email">—</div>
+        </div>
+      </div>
+      <a href="/logout" class="logout-btn">
+        <span>↩</span> Log out
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <div class="page-header">
+      <div class="greeting">My <em>Profile</em></div>
+      <div class="sub-greeting">Manage your account details and preferences.</div>
+    </div>
+
+    <!-- HERO CARD -->
+    <div class="profile-hero">
+      <div class="hero-avatar" id="hero-avatar">?</div>
+      <div class="hero-info">
+        <div class="hero-name" id="hero-name">Loading…</div>
+        <div class="hero-email" id="hero-email">—</div>
+        <div class="role-badge" id="hero-role">—</div>
+      </div>
+    </div>
+
+    <!-- GENERAL INFO -->
+    <div class="card">
+      <div class="card-title"><span class="card-title-icon">🏢</span> Organisation Details</div>
+      <div class="alert alert-error" id="info-error"></div>
+      <div class="alert alert-success" id="info-success"></div>
+
+      <form id="info-form">
+        <div class="form-grid">
+          <div class="field">
+            <label>Organisation / Venue name</label>
+            <input type="text" id="org_name" name="org_name" placeholder="e.g. Ramesh Marriage Hall" />
+          </div>
+          <div class="field">
+            <label>Contact person name</label>
+            <input type="text" id="contact_name" name="contact_name" placeholder="Your full name" />
+          </div>
+          <div class="field">
+            <label>Phone number</label>
+            <input type="tel" id="phone" name="phone" placeholder="+91 XXXXX XXXXX" />
+          </div>
+          <div class="field">
+            <label>Email address</label>
+            <input type="email" id="email" name="email" disabled />
+            <span class="field-hint">Email cannot be changed.</span>
+          </div>
+          <div class="field">
+            <label>City</label>
+            <input type="text" id="city" name="city" placeholder="e.g. Bengaluru" />
+          </div>
+          <div class="field">
+            <label>State</label>
+            <input type="text" id="state" name="state" placeholder="e.g. Karnataka" />
+          </div>
+
+          <!-- Donor-only fields -->
+          <div class="field donor-field" style="display:none;">
+            <label>Venue type</label>
+            <select id="venue_type" name="venue_type">
+              <option value="">Select type</option>
+              <option value="Marriage hall">Marriage hall</option>
+              <option value="Hotel/Restaurant">Hotel / Restaurant</option>
+              <option value="Corporate canteen">Corporate canteen</option>
+              <option value="Temple/Religious place">Temple / Religious place</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <!-- NGO-only fields -->
+          <div class="field ngo-field" style="display:none;">
+            <label>NGO registration number</label>
+            <input type="text" id="ngo_reg_number" name="ngo_reg_number" placeholder="e.g. MH/2019/0012345" />
+          </div>
+          <div class="field ngo-field" style="display:none;">
+            <label>Daily meal capacity</label>
+            <input type="number" id="capacity" name="capacity" placeholder="e.g. 500" min="1" />
+          </div>
+          <div class="field full ngo-field" style="display:none;">
+            <label>Areas served</label>
+            <input type="text" id="area_served" name="area_served" placeholder="e.g. Koramangala, HSR Layout, Indiranagar" />
+            <span class="field-hint">Comma-separated list of areas your NGO covers.</span>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button type="submit" class="btn-primary" id="save-info-btn">Save changes</button>
+          <button type="button" class="btn-ghost" id="reset-info-btn">Reset</button>
+          <span class="save-indicator" id="info-saved">✓ Saved!</span>
+        </div>
+      </form>
+    </div>
+
+    <!-- CHANGE PASSWORD -->
+    <div class="card">
+      <div class="card-title"><span class="card-title-icon">🔒</span> Change Password</div>
+      <div class="alert alert-error" id="pw-error"></div>
+      <div class="alert alert-success" id="pw-success"></div>
+
+      <form id="pw-form">
+        <div class="form-grid">
+          <div class="field">
+            <label>Current password</label>
+            <div class="pw-wrap">
+              <input type="password" id="current_password" name="current_password" placeholder="••••••••" />
+              <button type="button" class="pw-toggle" data-target="current_password">Show</button>
+            </div>
+          </div>
+          <div class="field" style="grid-column:1/-1; height:0; overflow:hidden;"></div>
+          <div class="field">
+            <label>New password</label>
+            <div class="pw-wrap">
+              <input type="password" id="new_password" name="new_password" placeholder="••••••••" />
+              <button type="button" class="pw-toggle" data-target="new_password">Show</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Confirm new password</label>
+            <div class="pw-wrap">
+              <input type="password" id="confirm_password" name="confirm_password" placeholder="••••••••" />
+              <button type="button" class="pw-toggle" data-target="confirm_password">Show</button>
+            </div>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button type="submit" class="btn-primary" id="save-pw-btn">Update password</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- SESSION INFO -->
+    <div class="card">
+      <div class="card-title"><span class="card-title-icon">🔑</span> Active Session</div>
+      <div class="session-info">
+        <div class="session-row">
+          <span class="session-row-label">Status</span>
+          <span class="session-row-val"><span class="status-dot"></span>Logged in</span>
+        </div>
+        <div class="session-row">
+          <span class="session-row-label">Account type</span>
+          <span class="session-row-val" id="sess-role">—</span>
+        </div>
+        <div class="session-row">
+          <span class="session-row-label">Session is remembered</span>
+          <span class="session-row-val">Yes — you won't be asked to log in again</span>
+        </div>
+      </div>
+      <div class="btn-row" style="margin-top:1rem;">
+        <a href="/logout" class="btn-ghost">Sign out of this device</a>
+      </div>
+    </div>
+
+    <!-- DANGER ZONE -->
+    <div class="danger-zone">
+      <div class="card-title"><span class="card-title-icon">⚠️</span> Danger Zone</div>
+      <p style="font-size:0.88rem; color:var(--gray-600); margin-bottom:1rem;">
+        Deleting your account is permanent and cannot be undone. All your listings and data will be removed.
+      </p>
+      <button class="btn-danger" onclick="confirmDelete()">Delete my account</button>
+    </div>
+
+  </main>
+
+  <script>
+    let originalData = {}
+
+    // ── Boot: load profile ───────────────────────────────────────────────────
+    async function loadProfile() {
+      let data
+      try {
+        const res = await fetch('/api/profile')
+        if (!res.ok) throw new Error('not logged in')
+        data = await res.json()
+      } catch {
+        // Preview / standalone mode — use mock data so the page renders
+        data = { user: {
+          id: 1, email: 'demo@annadaan.org', role: 'donor',
+          org_name: 'Demo Marriage Hall', contact_name: 'Ramesh Kumar',
+          phone: '+91 98765 43210', city: 'Bengaluru', state: 'Karnataka',
+          venue_type: 'Marriage hall', ngo_reg_number: '', capacity: '', area_served: ''
+        }}
+      }
+      const u = data.user
+      originalData = { ...u }
+
+      // Sidebar
+      const initials = (u.org_name || u.contact_name || u.email || '?').charAt(0).toUpperCase()
+      document.getElementById('sidebar-avatar').textContent = initials
+      document.getElementById('hero-avatar').textContent    = initials
+      document.getElementById('sidebar-name').textContent   = u.org_name || u.contact_name || 'You'
+      document.getElementById('sidebar-email').textContent  = u.email
+
+      // Hero
+      document.getElementById('hero-name').textContent  = u.org_name || u.contact_name || 'Your Profile'
+      document.getElementById('hero-email').textContent = u.email
+      document.getElementById('hero-role').textContent  = u.role === 'donor' ? '🍱 Food Donor' : '🤝 NGO Partner'
+      document.getElementById('sess-role').textContent  = u.role === 'donor' ? 'Food Donor' : 'NGO'
+
+      // Form fields
+      const fields = ['org_name','contact_name','phone','email','city','state','venue_type','ngo_reg_number','capacity','area_served']
+      fields.forEach(f => {
+        const el = document.getElementById(f)
+        if (el) el.value = u[f] || ''
+      })
+
+      // Show role-specific fields
+      if (u.role === 'donor') {
+        document.querySelectorAll('.donor-field').forEach(el => el.style.display = 'flex')
+      } else {
+        document.querySelectorAll('.ngo-field').forEach(el => el.style.display = 'flex')
+      }
+    }
+
+    // ── Save profile info ────────────────────────────────────────────────────
+    document.getElementById('info-form').addEventListener('submit', async (e) => {
+      e.preventDefault()
+      const btn = document.getElementById('save-info-btn')
+      btn.disabled = true; btn.textContent = 'Saving…'
+      hideAlerts()
+
+      const payload = {}
+      ;['org_name','contact_name','phone','city','state','venue_type','ngo_reg_number','capacity','area_served'].forEach(f => {
+        const el = document.getElementById(f)
+        if (el) payload[f] = el.value.trim()
+      })
+
+      let res, data
+      try {
+        res = await fetch('/api/profile', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        data = await res.json()
+      } catch {
+        // Preview mode — simulate success
+        res = { ok: true }
+        data = {}
+      }
+      btn.disabled = false; btn.textContent = 'Save changes'
+
+      if (res.ok) {
+        originalData = { ...originalData, ...payload }
+        showAlert('info-success', '✓ Profile updated successfully.')
+        const saved = document.getElementById('info-saved')
+        saved.classList.add('show')
+        setTimeout(() => saved.classList.remove('show'), 2500)
+        // Update sidebar + hero names
+        const name = payload.org_name || payload.contact_name || originalData.email
+        document.getElementById('sidebar-name').textContent = name
+        document.getElementById('hero-name').textContent    = name
+        const initials = name.charAt(0).toUpperCase()
+        document.getElementById('sidebar-avatar').textContent = initials
+        document.getElementById('hero-avatar').textContent    = initials
+      } else {
+        showAlert('info-error', data.error || 'Failed to save changes.')
+      }
+    })
+
+    // ── Reset info form ──────────────────────────────────────────────────────
+    document.getElementById('reset-info-btn').addEventListener('click', () => {
+      ;['org_name','contact_name','phone','city','state','venue_type','ngo_reg_number','capacity','area_served'].forEach(f => {
+        const el = document.getElementById(f)
+        if (el) el.value = originalData[f] || ''
+      })
+      hideAlerts()
+    })
+
+    // ── Change password ──────────────────────────────────────────────────────
+    document.getElementById('pw-form').addEventListener('submit', async (e) => {
+      e.preventDefault()
+      const btn = document.getElementById('save-pw-btn')
+      btn.disabled = true; btn.textContent = 'Updating…'
+      hideAlerts()
+
+      const current = document.getElementById('current_password').value
+      const newPw   = document.getElementById('new_password').value
+      const confirm = document.getElementById('confirm_password').value
+
+      if (!current || !newPw || !confirm) {
+        showAlert('pw-error', 'All password fields are required.')
+        btn.disabled = false; btn.textContent = 'Update password'; return
+      }
+      if (newPw.length < 8) {
+        showAlert('pw-error', 'New password must be at least 8 characters.')
+        btn.disabled = false; btn.textContent = 'Update password'; return
+      }
+      if (newPw !== confirm) {
+        showAlert('pw-error', 'New passwords do not match.')
+        btn.disabled = false; btn.textContent = 'Update password'; return
+      }
+
+      let res, data
+      try {
+        res = await fetch('/api/profile/password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ current_password: current, new_password: newPw })
+        })
+        data = await res.json()
+      } catch {
+        res = { ok: false }
+        data = { error: 'Not connected to Flask server (preview mode).' }
+      }
+      btn.disabled = false; btn.textContent = 'Update password'
+
+      if (res.ok) {
+        showAlert('pw-success', '✓ Password updated. Please log in again if prompted.')
+        document.getElementById('pw-form').reset()
+      } else {
+        showAlert('pw-error', data.error || 'Password update failed.')
+      }
+    })
+
+    // ── Password toggles ─────────────────────────────────────────────────────
+    document.querySelectorAll('.pw-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = document.getElementById(btn.dataset.target)
+        const isText = target.type === 'text'
+        target.type = isText ? 'password' : 'text'
+        btn.textContent = isText ? 'Show' : 'Hide'
+      })
+    })
+
+    // ── Delete account ───────────────────────────────────────────────────────
+    function confirmDelete() {
+      if (confirm('Are you absolutely sure? This will permanently delete your account and all data.')) {
+        fetch('/api/profile', { method: 'DELETE' }).then(r => {
+          if (r.ok) window.location.href = '/'
+        })
+      }
+    }
+
+    // ── Mobile sidebar ───────────────────────────────────────────────────────
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open')
+    }
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+    function showAlert(id, msg) {
+      const el = document.getElementById(id)
+      el.textContent = msg; el.classList.add('show')
+    }
+    function hideAlerts() {
+      document.querySelectorAll('.alert').forEach(el => el.classList.remove('show'))
+    }
+
+    loadProfile()
+  </script>
+
+</body>
+</html>

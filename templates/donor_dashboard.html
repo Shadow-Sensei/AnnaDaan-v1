@@ -291,6 +291,9 @@
       <a class="nav-item" onclick="showSection('impact')">
         <span class="nav-icon">🌱</span> My impact
       </a>
+      <a class="nav-item" href="{{ url_for('profile') }}">
+        <span class="nav-icon">👤</span> My profile
+      </a>
     </nav>
     <div class="sidebar-footer">
       <div class="user-chip">
@@ -450,28 +453,226 @@
       document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'))
       const map = { overview: 0, post: 1, listings: 2, impact: 3 }
       document.querySelectorAll('.nav-item')[map[name]].classList.add('active')
+      if (name === 'listings') loadMyListings()
+      if (name === 'overview' || name === 'impact') loadStats()
     }
 
-    // Post listing form handler
+    // ── Load stats ──────────────────────────────────────
+    async function loadStats() {
+      const res = await fetch('/api/listings/donor-stats')
+      const data = await res.json()
+      document.querySelectorAll('.stat-card-num')[0].textContent = data.total  || 0
+      document.querySelectorAll('.stat-card-num')[1].textContent = data.meals  || 0
+      document.querySelectorAll('.stat-card-num')[2].textContent = data.ngos   || 0
+    }
+
+    // ── Post listing ─────────────────────────────────────
     document.getElementById('listing-form').addEventListener('submit', async (e) => {
       e.preventDefault()
       const btn = document.getElementById('post-btn')
       btn.disabled = true
       btn.textContent = 'Posting…'
 
-      // Simulate post — replace with real fetch('/api/listings', ...) when backend route is ready
-      await new Promise(r => setTimeout(r, 900))
+      const payload = {
+        food_name: document.getElementById('food-name').value.trim(),
+        quantity:  document.getElementById('qty').value,
+        food_type: document.getElementById('food-type').value,
+        pickup_by: document.getElementById('pickup-by').value,
+        contact:   document.getElementById('contact-phone').value.trim(),
+        notes:     document.getElementById('notes').value.trim(),
+      }
 
-      const alert = document.getElementById('post-alert')
-      alert.className = 'alert alert-success show'
-      alert.textContent = '✅ Listing posted! Nearby NGOs have been notified.'
-      alert.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      try {
+        const res = await fetch('/api/listings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        const data = await res.json()
+        const alertEl = document.getElementById('post-alert')
+        if (res.ok) {
+          alertEl.className = 'alert alert-success show'
+          alertEl.textContent = '✅ Listing posted! Nearby NGOs have been notified.'
+          document.getElementById('listing-form').reset()
+          loadStats()
+        } else {
+          alertEl.className = 'alert alert-error show'
+          alertEl.textContent = '❌ ' + (data.error || 'Something went wrong.')
+        }
+        alertEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      } catch (err) {
+        console.error(err)
+      }
 
-      document.getElementById('listing-form').reset()
       btn.disabled = false
       btn.textContent = '🍽️ Post listing now'
     })
+
+    // ── Load my listings ─────────────────────────────────
+    async function loadMyListings() {
+      const container = document.getElementById('listings-container')
+      container.innerHTML = '<div style="color:var(--gray-400);font-size:0.9rem;padding:1rem 0;">Loading…</div>'
+      const res = await fetch('/api/listings/mine')
+      const data = await res.json()
+      if (!data.listings || data.listings.length === 0) {
+        container.innerHTML = `<div class="empty-state">
+          <div class="empty-emoji">📋</div>
+          <div>No listings yet. <a href="#" onclick="showSection('post')" style="color:var(--amber);font-weight:600;">Post your first one →</a></div>
+        </div>`
+        return
+      }
+      container.innerHTML = data.listings.map(l => `
+        <div class="card" id="lcard-${l.id}" style="margin-bottom:1rem; border-left: 4px solid ${l.status==='claimed' ? 'var(--green-light)' : 'var(--amber)'};">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.5rem;gap:1rem;">
+            <div style="flex:1;">
+              <div style="font-weight:700;font-size:1rem;color:var(--green);">🍽️ ${l.food_name}</div>
+              <div style="font-size:0.82rem;color:var(--gray-600);">${l.food_type} · ${l.quantity} servings · ${l.city}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+              <span style="font-size:0.75rem;font-weight:600;padding:4px 10px;border-radius:999px;background:${l.status==='claimed' ? 'var(--green-pale)' : 'var(--amber-pale)'};color:${l.status==='claimed' ? 'var(--green-mid)' : '#c05a3e'};">
+                ${l.status === 'claimed' ? '✅ Claimed' : '🟡 Available'}
+              </span>
+              ${l.status !== 'claimed' ? `
+                <button onclick="openEditModal(${l.id})" title="Edit" style="background:var(--gray-100);border:none;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:0.8rem;font-weight:600;color:var(--gray-600);">✏️ Edit</button>
+                <button onclick="deleteListing(${l.id})" title="Delete" style="background:#fef2f2;border:none;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:0.8rem;font-weight:600;color:var(--red);">🗑️</button>
+              ` : ''}
+            </div>
+          </div>
+          ${l.pickup_by ? `<div style="font-size:0.8rem;color:var(--gray-600);">⏰ Pickup by: ${l.pickup_by.replace('T',' ')}</div>` : ''}
+          ${l.notes ? `<div style="font-size:0.8rem;color:var(--gray-600);margin-top:3px;">📝 ${l.notes}</div>` : ''}
+          ${l.status === 'claimed' && l.claimed_by_name ? `
+            <div style="margin-top:0.75rem;padding:0.6rem 0.9rem;background:var(--green-pale);border-radius:8px;font-size:0.82rem;color:var(--green);">
+              <strong>Claimed by:</strong> ${l.claimed_by_name} · 📞 ${l.claimed_by_phone || 'N/A'}
+            </div>` : ''}
+          <div style="font-size:0.75rem;color:var(--gray-400);margin-top:0.5rem;">Posted ${l.created_at}</div>
+        </div>
+      `).join('')
+    }
+
+    // ── Delete listing ───────────────────────────────────
+    async function deleteListing(id) {
+      if (!confirm('Delete this listing? This cannot be undone.')) return
+      const res = await fetch(`/api/listings/${id}`, { method: 'DELETE' })
+      const data = await res.json()
+      if (res.ok) {
+        document.getElementById('lcard-' + id).remove()
+        loadStats()
+      } else {
+        alert(data.error || 'Could not delete.')
+      }
+    }
+
+    // ── Edit modal ────────────────────────────────────────
+    let editingId = null
+
+    function openEditModal(id) {
+      // get listing data from already-rendered card (re-fetch for accuracy)
+      fetch('/api/listings/mine').then(r => r.json()).then(data => {
+        const l = data.listings.find(x => x.id === id)
+        if (!l) return
+        editingId = id
+        document.getElementById('edit-food-name').value = l.food_name
+        document.getElementById('edit-qty').value       = l.quantity
+        document.getElementById('edit-food-type').value = l.food_type || ''
+        document.getElementById('edit-pickup-by').value = l.pickup_by || ''
+        document.getElementById('edit-contact').value   = l.contact || ''
+        document.getElementById('edit-notes').value     = l.notes || ''
+        document.getElementById('edit-modal').style.display = 'flex'
+      })
+    }
+
+    function closeEditModal() {
+      document.getElementById('edit-modal').style.display = 'none'
+      editingId = null
+    }
+
+    document.getElementById('edit-form').addEventListener('submit', async (e) => {
+      e.preventDefault()
+      if (!editingId) return
+      const btn = document.getElementById('edit-save-btn')
+      btn.disabled = true
+      btn.textContent = 'Saving…'
+
+      const payload = {
+        food_name: document.getElementById('edit-food-name').value.trim(),
+        quantity:  document.getElementById('edit-qty').value,
+        food_type: document.getElementById('edit-food-type').value,
+        pickup_by: document.getElementById('edit-pickup-by').value,
+        contact:   document.getElementById('edit-contact').value.trim(),
+        notes:     document.getElementById('edit-notes').value.trim(),
+      }
+
+      const res = await fetch(`/api/listings/${editingId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      const data = await res.json()
+      btn.disabled = false
+      btn.textContent = 'Save changes'
+      if (res.ok) {
+        closeEditModal()
+        loadMyListings()
+        loadStats()
+      } else {
+        alert(data.error || 'Could not save.')
+      }
+    })
+
+    // Load stats on page open
+    loadStats()
   </script>
+
+  <!-- EDIT MODAL -->
+  <div id="edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;align-items:center;justify-content:center;padding:1rem;">
+    <div style="background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+        <div style="font-family:var(--font-display);font-size:1.2rem;font-weight:700;color:var(--green);">Edit listing</div>
+        <button onclick="closeEditModal()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--gray-400);">✕</button>
+      </div>
+      <form id="edit-form">
+        <div class="field">
+          <label>Food name</label>
+          <input type="text" id="edit-food-name" required />
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="field">
+            <label>Servings</label>
+            <input type="number" id="edit-qty" min="1" required />
+          </div>
+          <div class="field">
+            <label>Food type</label>
+            <select id="edit-food-type">
+              <option value="">Select type</option>
+              <option>Cooked food (hot)</option>
+              <option>Cooked food (room temp)</option>
+              <option>Raw ingredients</option>
+              <option>Packaged / sealed</option>
+              <option>Baked goods</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="field">
+            <label>Pickup deadline</label>
+            <input type="datetime-local" id="edit-pickup-by" />
+          </div>
+          <div class="field">
+            <label>Contact number</label>
+            <input type="tel" id="edit-contact" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Notes</label>
+          <textarea id="edit-notes" style="min-height:70px;resize:vertical;font-family:var(--font-body);font-size:0.9rem;padding:0.65rem 0.9rem;border:1.5px solid var(--gray-200);border-radius:8px;width:100%;outline:none;"></textarea>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:0.5rem;">
+          <button type="button" onclick="closeEditModal()" style="flex:1;padding:0.75rem;border:1.5px solid var(--gray-200);border-radius:10px;background:#fff;font-family:var(--font-body);font-size:0.9rem;font-weight:600;color:var(--gray-600);cursor:pointer;">Cancel</button>
+          <button type="submit" id="edit-save-btn" style="flex:2;padding:0.75rem;border:none;border-radius:10px;background:var(--green);color:#fff;font-family:var(--font-body);font-size:0.9rem;font-weight:600;cursor:pointer;">Save changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
 </body>
 </html>
